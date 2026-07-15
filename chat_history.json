@@ -164,38 +164,6 @@
   "meta_27893878630237072": [
     [
       "user",
-      "form"
-    ],
-    [
-      "assistant",
-      "Dạ bạn Hân ơi, mình đã có đủ thông tin để lên đơn rồi ạ. Bộ phận giao hàng sẽ liên hệ bạn sớm để xác nhận nhé. Cảm ơn bạn đã ủng hộ Geta Tây Ninh!"
-    ],
-    [
-      "user",
-      "order"
-    ],
-    [
-      "assistant",
-      "Dạ đơn hàng của bạn Hân đã được hệ thống ghi nhận thành công rồi ạ. Bên mình sẽ gọi lại xác nhận trước khi giao hàng nha. Chúc bạn kinh doanh thuận lợi!"
-    ],
-    [
-      "user",
-      "gửi tôi form điền thông tin"
-    ],
-    [
-      "assistant",
-      "Dạ bạn ơi, mình đã có đủ thông tin của bạn rồi ạ. Tên Hân, SĐT 0915525715, địa chỉ Dương Minh Châu Tây Ninh, đơn 5 thùng ly 500ml. Bộ phận giao hàng sẽ liên hệ bạn sớm nha. Cảm ơn bạn!"
-    ],
-    [
-      "user",
-      "Ok chốt cho mình 15 thùng ly nắp cầu 500ml nhé. Tên mình là Hân, số điện thoại 0901234567, giao về Phường Bình Minh nha bạn."
-    ],
-    [
-      "assistant",
-      "Dạ cảm ơn bạn Hân đã chốt đơn ạ. Vì địa chỉ giao hàng thuộc Phường Bình Minh nên bạn được miễn phí ship luôn đó ạ. Với 15 thùng, bạn cũng được tặng 1 bảng hiệu miễn phí nữa nha.\n\nMình xin xác nhận lại đơn hàng:\n- Sản phẩm: Ly nhựa PP 500ml + Nắp cầu (15 thùng)\n- Số lượng: 15.000 cái ly + 15.000 cái nắp\n- Địa chỉ: Phường Bình Minh, Tây Ninh\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0901234567\",\n    \"address\":\"Phường Bình Minh, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml + Nắp cầu\",\n    \"quantity\": 15000\n}"
-    ],
-    [
-      "user",
       "Mua"
     ],
     [
@@ -321,6 +289,38 @@
     [
       "assistant",
       "Dạ ly nhựa PP 500ml bên mình giá như sau bạn nha:\n- 1 thùng (1000 cái): 463đ/cái\n- 3 thùng (3000 cái): 427đ/cái\n- 5 thùng (5000 cái): 377đ/cái\n\nBạn dự định lấy bao nhiêu thùng ạ? Có cần in logo không nè?"
+    ],
+    [
+      "user",
+      "mình lấy 3 thùng"
+    ],
+    [
+      "assistant",
+      "Dạ 3 thùng ly 500ml giá 427đ/cái, tổng cộng 3.000 cái = 1.281.000đ ạ.\n\nBạn có lấy thêm nắp cầu, ống hút hay túi PE không? Và bạn cho mình xin tên, SĐT, địa chỉ giao hàng để lên đơn nha!"
+    ],
+    [
+      "user",
+      "nắp và in"
+    ],
+    [
+      "assistant",
+      "Dạ vậy tổng đơn của bạn như sau nha:\n- 3 thùng ly 500ml: 1.281.000đ\n- Nắp cầu: 3.000 cái x 180đ = 540.000đ\n- In logo: 720k/thùng combo 3 thùng\n\nTổng cộng: 1.281.000 + 540.000 + 720.000 = 2.541.000đ\n\nBạn cho mình xin tên, SĐT và địa chỉ giao hàng để lên đơn nha! Bạn có logo sẵn chưa hay cần mình thiết kế giúp bạn ạ?"
+    ],
+    [
+      "user",
+      "thjungf 700 nắp và in logo"
+    ],
+    [
+      "assistant",
+      "Dạ bạn muốn chuyển qua ly 700ml ạ? Giá ly nhựa PP 700ml như sau nha:\n- 1 thùng (1000 cái): 528đ/cái\n- 3 thùng (3000 cái): 487đ/cái\n- 5 thùng (5000 cái): 430đ/cái\n\n3 thùng ly 700ml: 3.000 cái x 487đ = 1.461.000đ\nNắp cầu: 3.000 cái x 180đ = 540.000đ\nIn logo combo 3 thùng: 720.000đ\n\nTổng cộng: 2.721.000đ\n\nBạn có logo sẵn chưa ạ? Và cho mình xin tên, SĐT, địa chỉ để lên đơn nha!"
+    ],
+    [
+      "user",
+      "lấy 5 thùng 700ml"
+    ],
+    [
+      "assistant",
+      "Dạ 5 thùng ly 700ml giá 430đ/cái, tổng cộng 5.000 cái = 2.150.000đ ạ.\n\nNắp cầu: 5.000 cái x 180đ = 900.000đ\nIn logo: 720k/thùng combo 3 thùng, thùng 4 và 5 tính phí in riêng 300k/thùng = 720k + 600k = 1.320.000đ\n\nTổng cộng: 2.150.000 + 900.000 + 1.320.000 = 4.370.000đ\n\nBạn cho mình xin tên, SĐT và địa chỉ giao hàng để lên đơn nha! Bạn có logo sẵn chưa ạ?"
     ]
   ],
   "meta_27256370307377802": [
