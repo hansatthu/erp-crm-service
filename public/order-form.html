@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Thông tin nhận hàng - GETA Tây Ninh</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      color: #1c1e21;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+      text-align: center;
+      color: #050505;
+    }
+    p.desc {
+      text-align: center;
+      color: #65676b;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #050505;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccd0d5;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      border-color: #0a7cff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(10, 124, 255, 0.2);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #0a7cff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:disabled {
+      background-color: #e4e6eb;
+      color: #bcc0c4;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #65676b;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Xác nhận đơn hàng</h2>
+  <p class="desc">Vui lòng điền thông tin để GETA Tây Ninh giao hàng cho bạn nhé!</p>
+
+  <form id="orderForm">
+    <div class="form-group">
+      <label for="name">Họ và tên</label>
+      <input type="text" id="name" required placeholder="Nhập họ tên người nhận">
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Số điện thoại</label>
+      <input type="tel" id="phone" required placeholder="Nhập số điện thoại">
+    </div>
+
+    <div class="form-group">
+      <label for="address">Địa chỉ cụ thể</label>
+      <textarea id="address" rows="3" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="note">Ghi chú (Tùy chọn)</label>
+      <textarea id="note" rows="2" placeholder="Ghi chú thêm về đơn hàng hoặc thời gian nhận..."></textarea>
+    </div>
+
+    <button type="submit" id="submitBtn">Hoàn tất & Đặt hàng</button>
+    <div class="loading" id="loadingText">Đang gửi thông tin...</div>
+  </form>
+</div>
+
+<!-- Messenger Webview SDK -->
+<script>
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "https://connect.facebook.net/en_US/messenger.Extensions.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'Messenger'));
+</script>
+
+<script>
+  document.getElementById('orderForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const btn = document.getElementById('submitBtn');
+    const loading = document.getElementById('loadingText');
+    btn.disabled = true;
+    loading.style.display = 'block';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const psid = urlParams.get('psid');
+
+    const data = {
+      psid: psid,
+      name: document.getElementById('name').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+      note: document.getElementById('note').value
+    };
+
+    try {
+      const response = await fetch('/meta/submit-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        // Đóng webview nếu chạy trong Messenger
+        if (typeof MessengerExtensions !== 'undefined') {
+          MessengerExtensions.requestCloseBrowser(function success() {
+            // Webview closed
+          }, function error(err) {
+            console.error(err);
+            alert("Đặt hàng thành công! Vui lòng đóng cửa sổ này.");
+          });
+        } else {
+          alert("Đặt hàng thành công! Vui lòng đóng cửa sổ này.");
+        }
+      } else {
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi kết nối, vui lòng thử lại!");
+      btn.disabled = false;
+      loading.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>

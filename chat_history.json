@@ -1,0 +1,458 @@
+{
+  "meta_36933425479637264": [
+    [
+      "user",
+      "tôi muốn mua ly 360ml"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, 500 ly 360ml có in logo giá là 380đ/cái bạn nha.\n\nBạn cho mình xin Tên, SĐT và Địa chỉ để lên đơn giúp mình nha!"
+    ],
+    [
+      "user",
+      "mắc quá, giá 1 thùng thì sao"
+    ],
+    [
+      "assistant",
+      "Dạ 1 thùng 1000 cái 360ml có in logo giá là 322đ/cái, rẻ hơn nhiều so với 500 cái đó bạn.\n\nMà nếu bạn lấy combo 3 thùng thì giá in chỉ còn 720k/thùng, tiết kiệm hơn hẳn luôn ạ."
+    ],
+    [
+      "user",
+      "1 thùng được bao nhiêu cái"
+    ],
+    [
+      "assistant",
+      "Dạ 1 thùng ly 360ml là 1000 cái nha bạn."
+    ],
+    [
+      "user",
+      "không in thì sao"
+    ],
+    [
+      "assistant",
+      "Dạ nếu không in logo thì 500 ly 360ml giá chỉ 248đ/cái thôi bạn nha."
+    ],
+    [
+      "user",
+      "1 thùng thì sao"
+    ],
+    [
+      "assistant",
+      "Dạ 1 thùng 1000 cái không in logo giá là 248đ/cái, tổng cộng 248.000đ bạn nha."
+    ],
+    [
+      "user",
+      "thêm 1 thùng 500ml thì giá nhiêu"
+    ],
+    [
+      "assistant",
+      "Dạ 1 thùng ly 500ml không in logo giá là 356đ/cái, tổng cộng 356.000đ bạn nha.\n\nNếu lấy combo 2 thùng 360ml và 500ml, mình hỗ trợ miễn phí giao hàng luôn ạ."
+    ],
+    [
+      "user",
+      "2 thùng là đc miễn giao hàng r hả"
+    ],
+    [
+      "assistant",
+      "Dạ nếu địa chỉ giao hàng của bạn thuộc Phường Tân Ninh hoặc Phường Bình Minh thì 2 thùng sẽ được miễn phí giao hàng luôn nha bạn.\n\nBạn cho mình xin Tên, SĐT và Địa chỉ để mình kiểm tra với ạ."
+    ],
+    [
+      "user",
+      "quao năng suất quá"
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn, mình cố gắng hỗ trợ nhanh cho bạn tiện luôn đó ạ 😊\n\nBạn cho mình xin Tên, SĐT và Địa chỉ để lên đơn 2 thùng 360ml và 500ml nha bạn."
+    ],
+    [
+      "user",
+      "0 khách âmzing"
+    ],
+    [
+      "assistant",
+      "Dạ hi, bạn cho mình xin thông tin để lên đơn nha. Nhanh gọn là mình ship sớm cho bạn đó ạ 😊"
+    ],
+    [
+      "user",
+      "Hi"
+    ],
+    [
+      "assistant",
+      "Dạ chào bạn, Geta Tây Ninh đây ạ. Bên mình chuyên in ly, làm biển hiệu và cung cấp vật tư F&B. Mình có thể hỗ trợ gì cho bạn hôm nay?"
+    ],
+    [
+      "user",
+      "Cần ly 500ml"
+    ],
+    [
+      "assistant",
+      "Dạ ly 500ml bên mình có sẵn hàng nha bạn. Bạn cần số lượng bao nhiêu và có in logo không ạ?"
+    ],
+    [
+      "user",
+      "Đặt 5000 ly giao về DMC tây ninh"
+    ],
+    [
+      "assistant",
+      "Dạ 5000 ly 500ml không in logo giá chỉ 356đ/cái, tổng cộng 1.780.000đ nha bạn.\n\nBạn cho mình xin Tên, SĐT và địa chỉ cụ thể ở DMC để mình kiểm tra phí ship với ạ."
+    ],
+    [
+      "user",
+      "Lên đơn"
+    ],
+    [
+      "assistant",
+      "Dạ bạn cho mình xin Tên, SĐT và địa chỉ cụ thể để lên đơn nha."
+    ],
+    [
+      "user",
+      "Hân 0915525715 số 3 781 dương minh châu tây ninh"
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn Hân, mình xin xác nhận lại đơn hàng:\n\nTên: Hân\nSĐT: 0915525715\nĐịa chỉ: Số 3, 781 Dương Minh Châu, Tây Ninh\nSản phẩm: Ly nhựa PP 500ml - 5000 cái (không in logo)\nTổng tiền: 1.780.000đ\n\nĐịa chỉ của bạn thuộc Dương Minh Châu, mình sẽ kiểm tra phí ship và báo lại cho bạn nha.\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0915525715\",\n    \"address\":\"Số 3, 781 Dương Minh Châu, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml - 5000 cái (không in logo)\",\n    \"quantity\":5000,\n    \"total_price\":1780000\n}"
+    ],
+    [
+      "user",
+      "Hey"
+    ],
+    [
+      "assistant",
+      "Dạ chào bạn, Geta Tây Ninh đây ạ. Bên mình chuyên in ly, làm biển hiệu và cung cấp vật tư F&B. Mình có thể hỗ trợ gì cho bạn hôm nay?"
+    ],
+    [
+      "user",
+      "Thằng em bán chị ly 700"
+    ],
+    [
+      "assistant",
+      "Dạ ly 700ml bên mình có sẵn hàng nha bạn. Bạn cần số lượng bao nhiêu và có in logo không ạ?"
+    ],
+    [
+      "user",
+      "Lấy 500ly in logo"
+    ],
+    [
+      "assistant",
+      "Dạ 500 ly 700ml có in logo giá là 528đ/cái, tổng cộng 264.000đ nha bạn.\n\nBạn cho mình xin file logo để bên mình lên thiết kế duyệt trước khi in ạ."
+    ],
+    [
+      "user",
+      "Bạn báo giáo mình và tự thiết kế luôn"
+    ],
+    [
+      "assistant",
+      "Dạ bên mình thiết kế logo miễn phí hoàn toàn cho bạn nha. Bạn cho mình xin ý tưởng hoặc tên quán để mình lên mẫu gửi bạn duyệt trước ạ.\n\nSau đó bạn cho mình xin Tên, SĐT và Địa chỉ để lên đơn luôn nha."
+    ],
+    [
+      "user",
+      "Tên quán mimeo"
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn, mình đã ghi nhận tên quán Mimeo. Bên mình sẽ thiết kế logo và gửi bạn duyệt trong hôm nay nha.\n\nBạn cho mình xin SĐT và địa chỉ giao hàng để lên đơn với ạ."
+    ],
+    [
+      "user",
+      "Minh Đăng 0915262771 768 CMT8 Tân Ninh Tây Ninh"
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn Minh Đăng, địa chỉ Tân Ninh được miễn phí giao hàng luôn nha bạn.\n\nMình xin xác nhận lại đơn hàng:\nTên: Minh Đăng\nSĐT: 0915262771\nĐịa chỉ: 768 CMT8, Tân Ninh, Tây Ninh\nSản phẩm: Ly nhựa PP 700ml - 500 cái (có in logo + thiết kế miễn phí)\nTổng tiền: 264.000đ\n\nBên mình sẽ thiết kế logo gửi bạn duyệt rồi mới tiến hành in nha.\n\n{\n    \"customer_name\":\"Minh Đăng\",\n    \"phone\":\"0915262771\",\n    \"address\":\"768 CMT8, Tân Ninh, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 700ml - 500 cái (có in logo)\",\n    \"quantity\":500,\n    \"total_price\":264000\n}"
+    ]
+  ],
+  "meta_27893878630237072": [
+    [
+      "user",
+      "nhiu"
+    ],
+    [
+      "assistant",
+      "Dạ tổng đơn hàng 5 thùng ly 500ml của bạn Hân là 5000 cái x 377đ/cái = 1.885.000đ chưa bao gồm phí ship ạ. Nếu địa chỉ bạn ở khu vực được freeship thì mình sẽ báo lại sau nha."
+    ],
+    [
+      "user",
+      "ko"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, vậy tổng cộng đơn hàng của bạn Hân là 1.885.000đ chưa bao gồm phí ship ạ. Bên mình sẽ liên hệ lại để báo phí ship cụ thể cho bạn nha. Cảm ơn bạn!"
+    ],
+    [
+      "user",
+      "form"
+    ],
+    [
+      "assistant",
+      "Dạ bạn Hân ơi, mình đã có đủ thông tin để lên đơn rồi ạ. Bộ phận giao hàng sẽ liên hệ bạn sớm để xác nhận nhé. Cảm ơn bạn đã ủng hộ Geta Tây Ninh!"
+    ],
+    [
+      "user",
+      "order"
+    ],
+    [
+      "assistant",
+      "Dạ đơn hàng của bạn Hân đã được hệ thống ghi nhận thành công rồi ạ. Bên mình sẽ gọi lại xác nhận trước khi giao hàng nha. Chúc bạn kinh doanh thuận lợi!"
+    ],
+    [
+      "user",
+      "gửi tôi form điền thông tin"
+    ],
+    [
+      "assistant",
+      "Dạ bạn ơi, mình đã có đủ thông tin của bạn rồi ạ. Tên Hân, SĐT 0915525715, địa chỉ Dương Minh Châu Tây Ninh, đơn 5 thùng ly 500ml. Bộ phận giao hàng sẽ liên hệ bạn sớm nha. Cảm ơn bạn!"
+    ],
+    [
+      "user",
+      "Ok chốt cho mình 15 thùng ly nắp cầu 500ml nhé. Tên mình là Hân, số điện thoại 0901234567, giao về Phường Bình Minh nha bạn."
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn Hân đã chốt đơn ạ. Vì địa chỉ giao hàng thuộc Phường Bình Minh nên bạn được miễn phí ship luôn đó ạ. Với 15 thùng, bạn cũng được tặng 1 bảng hiệu miễn phí nữa nha.\n\nMình xin xác nhận lại đơn hàng:\n- Sản phẩm: Ly nhựa PP 500ml + Nắp cầu (15 thùng)\n- Số lượng: 15.000 cái ly + 15.000 cái nắp\n- Địa chỉ: Phường Bình Minh, Tây Ninh\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0901234567\",\n    \"address\":\"Phường Bình Minh, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml + Nắp cầu\",\n    \"quantity\": 15000\n}"
+    ],
+    [
+      "user",
+      "Mua"
+    ],
+    [
+      "assistant",
+      "Dạ bạn Hân cần mua thêm gì nữa không ạ? Bên mình còn có ống hút, túi PE, muỗng nhựa nữa đó. Bạn lấy combo luôn cho tiện kinh doanh nha!"
+    ],
+    [
+      "user",
+      "Ra đơn đi"
+    ],
+    [
+      "assistant",
+      "Dạ đơn hàng của bạn Hân đã được xác nhận và chuyển sang bộ phận xử lý rồi ạ. Bên mình sẽ giao hàng và tặng kèm 1 bảng hiệu miễn phí cho bạn nha. Cảm ơn bạn đã tin tưởng Geta Tây Ninh!"
+    ],
+    [
+      "user",
+      "Lên đơn luôn 5 thùng giao Dương Minh Châu"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, mình xin xác nhận lại đơn hàng của bạn Hân nha:\n- Sản phẩm: Ly nhựa PP 500ml + Nắp cầu (5 thùng)\n- Số lượng: 5000 cái ly + 5000 cái nắp\n- Địa chỉ: Dương Minh Châu, Tây Ninh\n\nVì địa chỉ Dương Minh Châu không thuộc khu vực freeship nên mình sẽ báo phí ship sau cho bạn nha.\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0901234567\",\n    \"address\":\"Dương Minh Châu, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml + Nắp cầu\",\n    \"quantity\": 5000\n}"
+    ],
+    [
+      "user",
+      "Mua"
+    ],
+    [
+      "assistant",
+      "Dạ bạn Hân cần mua thêm gì nữa không ạ? Bên mình còn ống hút Phi 12, túi PE, muỗng nhựa nữa đó. Lấy combo luôn cho tiện kinh doanh nha bạn!"
+    ],
+    [
+      "user",
+      "Ly 500ml"
+    ],
+    [
+      "assistant",
+      "Dạ ly nhựa PP 500ml bên mình giá như sau bạn nha:\n- 1 thùng (1000 cái): 463đ/cái\n- 3 thùng (3000 cái): 427đ/cái\n- 5 thùng (5000 cái): 377đ/cái\n\nBạn dự định lấy bao nhiêu thùng ạ?"
+    ],
+    [
+      "user",
+      "3 thùng ship về Dương Minnh Châu Tây ninh"
+    ],
+    [
+      "assistant",
+      "Dạ 3 thùng ly 500ml giá 427đ/cái, tổng cộng 3.000 cái = 1.281.000đ chưa bao gồm phí ship ạ.\n\nBạn cho mình xin SĐT và tên để lên đơn nha. Bạn có lấy thêm nắp cầu, ống hút hay túi PE không ạ?"
+    ],
+    [
+      "user",
+      "Hân\n0915525715\n3 781 Dương Minh Châu Tây Ninh"
+    ],
+    [
+      "assistant",
+      "Dạ mình xin xác nhận lại đơn hàng của bạn Hân nha:\n- Sản phẩm: Ly nhựa PP 500ml (3 thùng)\n- Số lượng: 3000 cái\n- Địa chỉ: 3 781 Dương Minh Châu, Tây Ninh\n- Tổng tiền: 1.281.000đ (chưa bao gồm phí ship)\n\nBạn có lấy thêm nắp cầu, ống hút hay túi PE không ạ? Nếu không mình tiến hành chốt đơn luôn nhé!\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0915525715\",\n    \"address\":\"3 781 Dương Minh Châu, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml\",\n    \"quantity\": 3000,\n    \"total_price\": 1281000\n}"
+    ],
+    [
+      "user",
+      "Gửi QR"
+    ],
+    [
+      "assistant",
+      "Dạ bạn Hân ơi, bên mình chưa có QR để gửi bạn ạ. Bộ phận giao hàng sẽ liên hệ bạn để xác nhận hình thức thanh toán nha. Cảm ơn bạn!"
+    ],
+    [
+      "user",
+      "Chuyển khoản"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, bạn vui lòng chuyển khoản theo thông tin sau ạ:\n\nChủ tài khoản: GETA Tây Ninh\nSố tài khoản: 1903686868018\nNgân hàng: Techcombank\nNội dung: Hân - 3 thùng ly 500ml - 1.281.000đ\n\nSau khi chuyển bạn gửi mình xác nhận để bên mình tiến hành giao hàng nha. Cảm ơn bạn!"
+    ],
+    [
+      "user",
+      "Link cọc"
+    ],
+    [
+      "assistant",
+      "Dạ bên mình chưa có link cọc online bạn ạ. Bạn vui lòng chuyển khoản trực tiếp vào tài khoản bên mình như mình đã gửi nha. Sau khi nhận được tiền, mình sẽ tiến hành giao hàng ngay cho bạn. Cảm ơn bạn Hân!"
+    ],
+    [
+      "user",
+      "In logo"
+    ],
+    [
+      "assistant",
+      "Dạ bạn Hân muốn in logo lên ly ạ? Bên mình có hỗ trợ thiết kế miễn phí và in logo ạ.\n\nGiá in dùng thử 1 thùng là 300k/thùng. Lần đầu in sẽ tốn phí làm khung in nên tổng giá in 1 thùng kèm nắp là 930k. Nếu bạn lấy combo 3 thùng thì được giảm giá in, chỉ còn 720k/thùng thôi ạ.\n\nBạn có logo sẵn chưa hay cần mình thiết kế giúp bạn nè?"
+    ],
+    [
+      "user",
+      "Ok để tôi lấy 10000 ly"
+    ],
+    [
+      "assistant",
+      "Dạ 10.000 ly 500ml giá 377đ/cái, tổng cộng 3.770.000đ ạ. Với số lượng 10 thùng, bạn được tặng 1 bảng hiệu miễn phí và miễn phí giao hàng nếu địa chỉ trong bán kính 5km nha.\n\nBạn có lấy thêm nắp cầu, ống hút hay túi PE không ạ?"
+    ],
+    [
+      "user",
+      "Ok k lấy"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, mình xin xác nhận lại đơn hàng của bạn Hân nha:\n- Sản phẩm: Ly nhựa PP 500ml (10 thùng)\n- Số lượng: 10.000 cái\n- Địa chỉ: 3 781 Dương Minh Châu, Tây Ninh\n- Tổng tiền: 3.770.000đ (chưa bao gồm phí ship)\n- Khuyến mãi: Tặng 1 bảng hiệu miễn phí\n\nBạn vui lòng chuyển khoản vào tài khoản bên mình để xác nhận đơn nha. Cảm ơn bạn!\n\n{\n    \"customer_name\":\"Hân\",\n    \"phone\":\"0915525715\",\n    \"address\":\"3 781 Dương Minh Châu, Tây Ninh\",\n    \"product\":\"Ly nhựa PP 500ml\",\n    \"quantity\": 10000,\n    \"total_price\": 3770000\n}"
+    ],
+    [
+      "user",
+      "Link chuyển khoản đâu"
+    ],
+    [
+      "assistant",
+      "Dạ thông tin chuyển khoản của bên mình đây bạn nha:\n\nChủ tài khoản: GETA Tây Ninh\nSố tài khoản: 1903686868018\nNgân hàng: Techcombank\nNội dung: Hân - 10 thùng ly 500ml - 3.770.000đ\n\nSau khi chuyển bạn gửi mình xác nhận để bên mình tiến hành giao hàng nha. Cảm ơn bạn Hân!"
+    ]
+  ],
+  "meta_27256370307377802": [
+    [
+      "user",
+      "chào bạn"
+    ],
+    [
+      "assistant",
+      "Xin chào bạn 👋 Geta Tây Ninh đây ạ. Bên mình chuyên in ly, làm biển hiệu và cung cấp vật tư F&B. Mình có thể hỗ trợ gì cho bạn hôm nay?"
+    ],
+    [
+      "user",
+      "giá ly 500 sao bạn"
+    ],
+    [
+      "assistant",
+      "Dạ, ly nhựa PP 500ml bên mình giá 463đ/cái khi lấy 1000 cái nha bạn. Bạn cần in số lượng bao nhiêu để mình báo giá chính xác hơn nè?"
+    ],
+    [
+      "user",
+      "giá ly 500 nhiu bạn"
+    ],
+    [
+      "assistant",
+      "Dạ, ly nhựa PP 500ml nếu lấy 1000 cái là 463đ/cái, còn lấy 3000 cái chỉ còn 427đ/cái thôi bạn. Bạn dùng in logo hay lấy ly trơn vậy ạ? [LABEL: Khách Mới]"
+    ],
+    [
+      "user",
+      "in logo luôn bạn nhé"
+    ],
+    [
+      "assistant",
+      "Dạ, in logo thì mình nhận in từ 1000 ly trở lên nha bạn. Lần đầu in sẽ có phí làm khung in 300k. Nếu bạn lấy 1 thùng (1000 ly) kèm nắp cầu thì tổng cộng 930k. Còn lấy combo 3 thùng (3000 ly) thì giá in chỉ còn 720k/thùng thôi, tiết kiệm hơn nhiều đó ạ. Bạn có cần lấy kèm nắp và ống hút không?"
+    ],
+    [
+      "user",
+      "giá giảm chút được không ?"
+    ],
+    [
+      "assistant",
+      "Dạ, giá bên mình là giá xưởng trực tiếp rồi bạn ơi, được thiết kế logo miễn phí, tặng bảng hiệu nếu lấy 10 thùng và freeship khu vực Tân Ninh, Bình Minh nữa đó ạ. Bạn lấy combo 3 thùng là mức giá tốt nhất rồi nha."
+    ],
+    [
+      "user",
+      "giao đi tân châu có giao hàng không ?"
+    ],
+    [
+      "assistant",
+      "Dạ, Tân Châu thì mình vẫn giao được bạn ơi, nhưng xa hơn 5km nên sẽ có phí ship nha bạn. Bạn lấy combo 3 thùng là 720k/thùng, mình báo ship trước cho bạn duyệt nha."
+    ],
+    [
+      "user",
+      "lấy 10 thùng thì giá bao nhiêu"
+    ],
+    [
+      "assistant",
+      "Dạ, nếu bạn lấy 10 thùng ly 500ml, giá sẽ là 377đ/cái (tương đương 377k/thùng) nha bạn. Với số lượng này bạn được tặng 1 biển hiệu miễn phí và freeship trong bán kính 5km luôn đó ạ. Bạn có cần lấy kèm nắp cầu, ống hút không nè?"
+    ],
+    [
+      "user",
+      "phí ship là bao nhiêu"
+    ],
+    [
+      "assistant",
+      "Dạ, bạn cho mình xin địa chỉ cụ thể ở Tân Châu để mình check phí ship chính xác nha bạn. Còn nếu bạn lấy 10 thùng thì được freeship 5km, phần xa hơn mình sẽ báo sau ạ. Bạn cho mình xin Tên, SĐT và địa chỉ để lên đơn luôn nha."
+    ],
+    [
+      "user",
+      "ngay bồn binh tân châu đó bạn"
+    ],
+    [
+      "assistant",
+      "Dạ, Bồn Binh Tân Châu thì mình tính phí ship khoảng 150k-200k cho 10 thùng nha bạn. Bạn cho mình xin Tên, SĐT và địa chỉ cụ thể để lên đơn, mình báo giá ship chính xác luôn ạ."
+    ],
+    [
+      "user",
+      "cường 0919511911"
+    ],
+    [
+      "assistant",
+      "Dạ, mình xin xác nhận lại đơn hàng của bạn Cường nha:\n\n- Sản phẩm: Ly nhựa PP 500ml in logo\n- Số lượng: 10 thùng (10.000 cái) - giá 377đ/cái\n- Tặng kèm: 1 biển hiệu miễn phí\n- Phí ship: khoảng 150k-200k (sẽ báo chính xác sau)\n- Địa chỉ: Bồn Binh, Tân Châu\n\nBạn cho mình xin thêm địa chỉ cụ thể (số nhà, ấp, đường) để lên đơn chính xác nha bạn Cường ơi. Bạn có cần lấy thêm nắp cầu, ống hút không ạ?"
+    ],
+    [
+      "user",
+      "ko có số nhà, tới ngay bồn binh gọi mình là đón"
+    ],
+    [
+      "assistant",
+      "Dạ vậy mình chốt đơn giúp bạn Cường nha.\n\n{\n    \"customer_name\":\"Cường\",\n    \"phone\":\"0919511911\",\n    \"address\":\"Bồn Binh, Tân Châu\",\n    \"product\":\"Ly nhựa PP 500ml in logo\",\n    \"quantity\": 10000\n}\n\nBạn Cường ơi, mình ship hàng tới nơi sẽ gọi bạn ra đón nha. Cảm ơn bạn đã tin tưởng Geta Tây Ninh ạ!"
+    ],
+    [
+      "user",
+      "ok"
+    ],
+    [
+      "assistant",
+      "Dạ cảm ơn bạn Cường nhiều nha! Mình sẽ liên hệ lại để báo lịch giao hàng sớm nhất. Chúc bạn kinh doanh thuận lợi ạ!"
+    ]
+  ],
+  "meta_27532096933120965": [
+    [
+      "user",
+      "chào bạn"
+    ],
+    [
+      "assistant",
+      "Xin chào bạn 👋 Geta Tây Ninh đây ạ. Bên mình chuyên in ly, làm biển hiệu và cung cấp vật tư F&B. Mình có thể hỗ trợ gì cho bạn hôm nay?"
+    ],
+    [
+      "user",
+      "mình cần tư vấn ly nhựa"
+    ],
+    [
+      "assistant",
+      "Dạ bạn muốn tìm loại ly dung tích bao nhiêu ml ạ? Bên mình có 140ml, 220ml, 360ml, 500ml và 700ml nè."
+    ],
+    [
+      "user",
+      "mình mới mở quán"
+    ],
+    [
+      "assistant",
+      "Dạ vậy bạn định bán trà sữa hay cà phê vậy? Để mình tư vấn loại ly phù hợp cho quán mới nha."
+    ],
+    [
+      "user",
+      "nên chưa biết ly nào phù hợp"
+    ],
+    [
+      "assistant",
+      "Dạ nếu bán trà sữa thì mình gợi ý ly 500ml hoặc 700ml kèm nắp cầu và ống hút đó bạn. Còn bán cà phê thì ly 360ml hoặc 500ml là chuẩn nha."
+    ]
+  ]
+}

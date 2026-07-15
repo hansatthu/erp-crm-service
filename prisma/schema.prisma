@@ -1,0 +1,174 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+enum PartnerType {
+  LEAD
+  CUSTOMER_B2C
+  CUSTOMER_B2B
+  SUPPLIER
+}
+
+enum ProductType {
+  DRINK
+  PRINTING
+  MATERIAL
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PROCESSING
+  SHIPPING
+  COMPLETED
+  CANCELLED
+}
+
+model Partner {
+  id                String       @id @default(uuid())
+  code              String?      @unique @db.VarChar(50)
+  type              PartnerType
+  fullName          String       @db.VarChar(255)
+  phone             String?      @unique @db.VarChar(20)
+  email             String?      @db.VarChar(255)
+  taxCode           String?      @db.VarChar(50)
+  dynamicAttributes Json?
+  status            String       @default("NEW") @db.VarChar(50)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  priceLists        PriceList[]
+  salesOrders       SalesOrder[]
+  purchaseOrders    PurchaseOrder[]
+
+  @@index([phone])
+  @@index([type])
+}
+
+model Product {
+  id             String       @id @default(uuid())
+  sku            String       @unique @db.VarChar(50)
+  name           String       @db.VarChar(255)
+  type           ProductType
+  baseUnit       String       @db.VarChar(20)
+  costPrice      Decimal      @default(0) @db.Decimal(15, 2)
+  retailPrice    Decimal      @default(0) @db.Decimal(15, 2)
+  safeStockLevel Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+
+  priceListDetails PriceListDetail[]
+  inventories      Inventory[]
+  salesOrderDetails SalesOrderDetail[]
+
+  @@index([sku])
+}
+
+model PriceList {
+  id        String   @id @default(uuid())
+  partnerId String? 
+  name      String   @db.VarChar(255)
+  validFrom DateTime? @db.Date
+  validTo   DateTime? @db.Date
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  partner          Partner?          @relation(fields: [partnerId], references: [id])
+  priceListDetails PriceListDetail[]
+}
+
+model PriceListDetail {
+  id          String  @id @default(uuid())
+  priceListId String 
+  productId   String 
+  price       Decimal @db.Decimal(15, 2)
+  minQuantity Int     @default(1)
+
+  priceList PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@unique([priceListId, productId, minQuantity])
+}
+
+model Warehouse {
+  id       String      @id @default(uuid())
+  code     String      @unique @db.VarChar(50)
+  name     String      @db.VarChar(255)
+  location String?
+  
+  inventories Inventory[]
+}
+
+model Inventory {
+  id               String   @id @default(uuid())
+  warehouseId      String  
+  productId        String  
+  quantityOnHand   Int      @default(0)
+  quantityReserved Int      @default(0)
+  lastUpdated      DateTime @default(now())
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@unique([warehouseId, productId])
+}
+
+model SalesOrder {
+  id              String      @id @default(uuid())
+  orderNo         String      @unique @db.VarChar(50)
+  customerId      String?    
+  totalAmount     Decimal     @db.Decimal(15, 2)
+  status          OrderStatus @default(DRAFT)
+  pipelineSource  String?     @db.VarChar(50)
+  deliveryAddress String?
+  createdAt       DateTime    @default(now())
+
+  customer       Partner?           @relation(fields: [customerId], references: [id])
+  orderDetails   SalesOrderDetail[]
+  deliveryOrders DeliveryOrder[]
+
+  @@index([status])
+}
+
+model SalesOrderDetail {
+  id        String  @id @default(uuid())
+  orderId   String 
+  productId String 
+  quantity  Int
+  unitPrice Decimal @db.Decimal(15, 2)
+  subtotal  Decimal @db.Decimal(15, 2)
+
+  order   SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product    @relation(fields: [productId], references: [id])
+}
+
+model PurchaseOrder {
+  id           String    @id @default(uuid())
+  poNo         String    @unique @db.VarChar(50)
+  supplierId   String?  
+  totalAmount  Decimal?  @db.Decimal(15, 2)
+  status       String    @default("DRAFT") @db.VarChar(50)
+  expectedDate DateTime? @db.Date
+  createdAt    DateTime  @default(now())
+
+  supplier Partner? @relation(fields: [supplierId], references: [id])
+}
+
+model DeliveryOrder {
+  id              String    @id @default(uuid())
+  salesOrderId    String?  
+  trackingCode    String?   @db.VarChar(100)
+  logisticPartner String?   @db.VarChar(50)
+  status          String    @default("PENDING") @db.VarChar(50)
+  shippedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+}
