@@ -69,7 +69,7 @@ async function main() {
       const role = msg[0];
       const content = msg[1];
       
-      let sender = SenderType.CUSTOMER;
+      let sender: SenderType = SenderType.CUSTOMER;
       if (role === 'assistant') {
         sender = SenderType.AI;
       } else if (role === 'admin') {
