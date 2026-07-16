@@ -64,6 +64,7 @@ model Customer {
   interests     CustomerInterest[]
   tags          CustomerTag[]
   aiData        CustomerAi?
+  orders        Order[]
 
   @@map("customers")
 }
@@ -153,4 +154,34 @@ model CustomerAi {
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_ai")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNo         String      @unique @db.VarChar(50)
+  customerId      String      @map("customer_id")
+  totalAmount     Decimal     @map("total_amount") @db.Decimal(15, 2)
+  status          String      @default("PENDING") @db.VarChar(50)
+  paymentMethod   String?     @map("payment_method") @db.VarChar(50)
+  shippingAddress String?     @map("shipping_address") @db.Text
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  productName String  @map("product_name") @db.VarChar(255)
+  quantity    Int
+  unitPrice   Decimal @map("unit_price") @db.Decimal(15, 2)
+  subtotal    Decimal @db.Decimal(15, 2)
+
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
 }
