@@ -9,6 +9,39 @@ generator client {
   engineType = "library"
 }
 
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  ZALO
+}
+
+enum SourceType {
+  MESSENGER
+  INSTAGRAM_DM
+  COMMENT
+  ADS
+  WEBSITE
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum SenderType {
+  CUSTOMER
+  AI
+  ADMIN
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  VIDEO
+  VOICE
+}
+
 enum PartnerType {
   LEAD
   CUSTOMER_B2C
@@ -171,4 +204,101 @@ model DeliveryOrder {
   createdAt       DateTime  @default(now())
 
   salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+}
+
+model Customer {
+  id           String   @id @default(uuid())
+  metaUserId   String?  @map("meta_user_id") @db.VarChar(255)
+  platform     Platform?
+  fullName     String?  @map("full_name") @db.VarChar(255)
+  phone        String?  @db.VarChar(20)
+  email        String?  @db.VarChar(255)
+  avatarUrl    String?  @map("avatar_url") @db.Text
+  profileUrl   String?  @map("profile_url") @db.Text
+  address      String?  @db.Text
+  city         String?  @db.VarChar(100)
+  district     String?  @db.VarChar(100)
+  ward         String?  @db.VarChar(100)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  sources       CustomerSource[]
+  conversations Conversation[]
+  interests     CustomerInterest[]
+  tags          CustomerTag[]
+
+  @@map("customers")
+}
+
+model CustomerSource {
+  id           String     @id @default(uuid())
+  customerId   String     @map("customer_id")
+  pageId       String?    @map("page_id") @db.VarChar(255)
+  pageName     String?    @map("page_name") @db.VarChar(255)
+  sourceType   SourceType? @map("source_type")
+  campaignName String?    @map("campaign_name") @db.VarChar(255)
+  adsetName    String?    @map("adset_name") @db.VarChar(255)
+  adName       String?    @map("ad_name") @db.VarChar(255)
+  postId       String?    @map("post_id") @db.VarChar(255)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_sources")
+}
+
+model Conversation {
+  id              String             @id @default(uuid())
+  customerId      String             @map("customer_id")
+  platform        Platform?
+  conversationId  String?            @map("conversation_id") @db.VarChar(255)
+  startedAt       DateTime           @default(now()) @map("started_at")
+  lastMessageAt   DateTime           @default(now()) @map("last_message_at")
+  aiSummary       String?            @map("ai_summary") @db.Text
+  aiIntent        String?            @map("ai_intent") @db.VarChar(255)
+  status          ConversationStatus? @default(OPEN)
+
+  customer        Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  messages        Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id              String      @id @default(uuid())
+  conversationId  String      @map("conversation_id")
+  sender          SenderType?
+  messageType     MessageType? @map("message_type")
+  content         String?     @db.Text
+  attachmentUrl   String?     @map("attachment_url") @db.Text
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model CustomerInterest {
+  id           String    @id @default(uuid())
+  customerId   String    @map("customer_id")
+  productName  String?   @map("product_name") @db.VarChar(255)
+  quantity     Int?
+  budget       Decimal?  @db.Decimal(15, 2)
+  deadline     DateTime? @db.Date
+  note         String?   @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_interests")
+}
+
+model CustomerTag {
+  id           String    @id @default(uuid())
+  customerId   String    @map("customer_id")
+  tagName      String?   @map("tag_name") @db.VarChar(255)
+
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_tags")
 }
