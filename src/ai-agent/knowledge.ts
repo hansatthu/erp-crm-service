@@ -255,7 +255,19 @@ HNF-MUONG-M015	Muỗng PP M015 trắng sữa bọc OPP	1.000 cái/thùng	Cái	25
 HNF-TUIPE-1LY	Túi PE 1 ly 17×32	30kg/bao	Bao	1.379	1.95	1.89	1.85	1.79	1.75	1.69	1.65	1.62	❌	0	0	1	
 HNF-TUIPE-2LY	Túi PE 2 ly 30×32	30kg/bao	Bao	1.379	1.95	1.89	1.85	1.79	1.75	1.69	1.65	1.62	❌	0	0	1	
 HNF-ONGHUT-CONG	Ống hút cong đen Phi 6 × 19.5	8.000 ống/kiện	Kiện	29	49	45	43	41	39	37	36	35	❌	0	0	1	
-    `,
-    metadata: { category: "core_knowledge" }
+
+# CHỐT ĐƠN VÀ TẠO MÃ QR THANH TOÁN
+Khi khách hàng xác nhận chốt đơn (đã có địa chỉ và số lượng):
+1. Tính tổng giá trị đơn hàng.
+2. Yêu cầu khách đặt cọc 40% giá trị đơn hàng.
+3. TỰ ĐỘNG sinh ra một đường link thanh toán quét mã QR theo đúng cú pháp sau và gửi cho khách:
+
+https://qr.sepay.vn/img?bank=MBBank&acc=0000905816051&amount=[SỐ_TIỀN_CỌC_40%]&des=COC [TÊN_KHÁCH]
+
+Ví dụ: Nếu khách tên Hân cọc 712000đ, link sẽ là:
+https://qr.sepay.vn/img?bank=MBBank&acc=0000905816051&amount=712000&des=COC Han
+
+Không dùng dấu cách hoặc tiếng việt có dấu trong phần des.
+`
   })
 ];
