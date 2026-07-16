@@ -27,53 +27,18 @@ export class ReportsService {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      // Fetch all leads interacted today
-      const leadsToday = await this.prisma.partner.findMany({
-        where: {
-          type: 'LEAD',
-          updatedAt: {
-            gte: today,
-            lt: tomorrow,
-          },
-        },
-      });
-
-      // Group leads by status
-      const groupedLeads = leadsToday.reduce((acc, lead) => {
-        acc[lead.status] = (acc[lead.status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Count total orders today
-      const ordersToday = await this.prisma.salesOrder.count({
-        where: {
-          createdAt: {
-            gte: today,
-            lt: tomorrow,
-          },
-        },
-      });
-
-      const totalContacts = leadsToday.length;
+      // Legacy Partner and SalesOrder logic commented out
+      const totalContacts = 0; // leadsToday.length;
       
       let reportMessage = `📊 BÁO CÁO CUỐI NGÀY GETA TÂY NINH 📊\n`;
       reportMessage += `${totalContacts} khách hàng liên hệ\n`;
       
       let hoiChoiCount = 0;
       let baoGiaCount = 0;
-      for (const [status, count] of Object.entries(groupedLeads)) {
-        if (status.includes('Mới') || status.includes('Hỏi')) {
-          hoiChoiCount += count;
-        } else if (status.includes('Báo Giá') || status.includes('Suy Nghĩ')) {
-          baoGiaCount += count;
-        } else {
-          hoiChoiCount += count; // Default to hoi choi if unknown
-        }
-      }
       
       reportMessage += `${hoiChoiCount} khách hỏi chơi không mua\n`;
       reportMessage += `${baoGiaCount} khách báo giá rồi ko mua\n`;
-      reportMessage += `${ordersToday} khách mua ( chốt đơn thành công)\n`;
+      reportMessage += `0 khách mua ( chốt đơn thành công)\n`;
 
       this.logger.log(`\n=== DAILY REPORT ===\n${reportMessage}\n====================`);
 

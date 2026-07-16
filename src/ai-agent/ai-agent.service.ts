@@ -273,7 +273,8 @@ ${context}
         textToProcess = textToProcess.replace(labelRegex, '').trim();
         
         try {
-          // Attempt to upsert partner based on sessionId
+          // Attempt to upsert partner based on sessionId (Legacy logic - commented out)
+          /*
           await this.prisma.partner.upsert({
             where: { code: sessionId },
             update: { status: extractedLabel, updatedAt: new Date() },
@@ -284,6 +285,7 @@ ${context}
               status: extractedLabel,
             }
           });
+          */
         } catch (dbErr) {
           this.logger.error(`Failed to upsert Partner for session ${sessionId}`, dbErr);
         }
