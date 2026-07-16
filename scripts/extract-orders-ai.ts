@@ -76,6 +76,7 @@ CHÚ Ý:
 - Khách hàng có thể hỏi giá nhiều loại, chỉ lấy loại khách CHỐT cuối cùng.
 - Phải có địa chỉ giao hàng thì mới tính là chốt đơn (isOrderPlaced = true).
 - Nếu không có đơn hàng nào được chốt, hãy trả về isOrderPlaced = false.
+- ĐẶC BIỆT CHÚ Ý ĐẾN TIỀN CỌC: Nếu trong đoạn chat có nhắc đến việc khách đã cọc (ví dụ: cọc 40%, cọc 50%, đã chuyển khoản...), hãy tự động lấy (totalAmount * phần trăm cọc) để tính ra số tiền cọc và ghi vào trường depositAmount. Nếu khách không nhắc gì đến cọc, để 0. Đồng thời nếu khách đã cọc, đổi paymentMethod thành "CHUYỂN KHOẢN".
 
 Hội thoại:
 ${transcript}
@@ -87,6 +88,7 @@ VUI LÒNG TRẢ VỀ ĐÚNG ĐỊNH DẠNG JSON NHƯ SAU, KHÔNG GIẢI THÍCH G
   "shippingAddress": "Địa chỉ giao hàng đầy đủ",
   "paymentMethod": "COD",
   "totalAmount": 100000, // Số nguyên
+  "depositAmount": 40000, // Số tiền cọc khách đã chuyển (VD 40% của totalAmount). Nếu chưa cọc để 0.
   "items": [
     {
       "productName": "Tên sp",
@@ -116,6 +118,7 @@ VUI LÒNG TRẢ VỀ ĐÚNG ĐỊNH DẠNG JSON NHƯ SAU, KHÔNG GIẢI THÍCH G
             orderNo: orderNo,
             customerId: conv.customer.id,
             totalAmount: result.totalAmount || 0,
+            depositAmount: result.depositAmount || 0,
             status: 'PENDING',
             paymentMethod: result.paymentMethod || 'COD',
             shippingAddress: result.shippingAddress || '',
