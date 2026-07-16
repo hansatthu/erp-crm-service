@@ -161,6 +161,7 @@ model Order {
   orderNo         String      @unique @db.VarChar(50)
   customerId      String      @map("customer_id")
   totalAmount     Decimal     @map("total_amount") @db.Decimal(15, 2)
+  depositAmount   Decimal?    @map("deposit_amount") @db.Decimal(15, 2)
   status          String      @default("PENDING") @db.VarChar(50)
   paymentMethod   String?     @map("payment_method") @db.VarChar(50)
   shippingAddress String?     @map("shipping_address") @db.Text
