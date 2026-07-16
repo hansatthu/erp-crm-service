@@ -41,7 +41,8 @@ async function main() {
     temperature: 0.1, // Nhiệt độ thấp để trả về dữ liệu chính xác
   });
 
-  const modelWithStructure = model.withStructuredOutput(OrderSchema);
+  // Chúng ta sẽ bỏ withStructuredOutput vì DeepSeek có thể chưa hỗ trợ strict mode của OpenAI SDK
+  // const modelWithStructure = model.withStructuredOutput(OrderSchema);
 
   console.log('Đang lấy danh sách các hội thoại từ Database...');
   
@@ -78,10 +79,31 @@ CHÚ Ý:
 
 Hội thoại:
 ${transcript}
+
+VUI LÒNG TRẢ VỀ ĐÚNG ĐỊNH DẠNG JSON NHƯ SAU, KHÔNG GIẢI THÍCH GÌ THÊM:
+{
+  "isOrderPlaced": boolean, // true nếu chốt, false nếu chưa
+  "customerName": "Tên khách",
+  "shippingAddress": "Địa chỉ giao hàng đầy đủ",
+  "paymentMethod": "COD",
+  "totalAmount": 100000, // Số nguyên
+  "items": [
+    {
+      "productName": "Tên sp",
+      "quantity": 1,
+      "unitPrice": 50000,
+      "subtotal": 50000
+    }
+  ]
+}
 `;
 
     try {
-      const result = await modelWithStructure.invoke(prompt);
+      const response = await model.invoke(prompt, {
+        response_format: { type: "json_object" }
+      });
+      
+      const result = JSON.parse(response.content as string);
       
       if (result.isOrderPlaced && result.items && result.items.length > 0) {
         console.log(`🎯 Đã phát hiện đơn hàng! Khách mua: ${result.items.map(i => i.productName).join(', ')}`);
