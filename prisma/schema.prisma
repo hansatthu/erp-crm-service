@@ -1,11 +1,11 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -42,185 +42,22 @@ enum MessageType {
   VOICE
 }
 
-enum PartnerType {
-  LEAD
-  CUSTOMER_B2C
-  CUSTOMER_B2B
-  SUPPLIER
-}
-
-enum ProductType {
-  DRINK
-  PRINTING
-  MATERIAL
-}
-
-enum OrderStatus {
-  DRAFT
-  CONFIRMED
-  PROCESSING
-  SHIPPING
-  COMPLETED
-  CANCELLED
-}
-
-model Partner {
-  id                String       @id @default(uuid())
-  code              String?      @unique @db.VarChar(50)
-  type              PartnerType
-  fullName          String       @db.VarChar(255)
-  phone             String?      @unique @db.VarChar(20)
-  email             String?      @db.VarChar(255)
-  taxCode           String?      @db.VarChar(50)
-  dynamicAttributes Json?
-  status            String       @default("NEW") @db.VarChar(50)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  priceLists        PriceList[]
-  salesOrders       SalesOrder[]
-  purchaseOrders    PurchaseOrder[]
-
-  @@index([phone])
-  @@index([type])
-}
-
-model Product {
-  id             String       @id @default(uuid())
-  sku            String       @unique @db.VarChar(50)
-  name           String       @db.VarChar(255)
-  type           ProductType
-  baseUnit       String       @db.VarChar(20)
-  costPrice      Decimal      @default(0) @db.Decimal(15, 2)
-  retailPrice    Decimal      @default(0) @db.Decimal(15, 2)
-  safeStockLevel Int          @default(0)
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-
-  priceListDetails PriceListDetail[]
-  inventories      Inventory[]
-  salesOrderDetails SalesOrderDetail[]
-
-  @@index([sku])
-}
-
-model PriceList {
-  id        String   @id @default(uuid())
-  partnerId String? 
-  name      String   @db.VarChar(255)
-  validFrom DateTime? @db.Date
-  validTo   DateTime? @db.Date
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-
-  partner          Partner?          @relation(fields: [partnerId], references: [id])
-  priceListDetails PriceListDetail[]
-}
-
-model PriceListDetail {
-  id          String  @id @default(uuid())
-  priceListId String 
-  productId   String 
-  price       Decimal @db.Decimal(15, 2)
-  minQuantity Int     @default(1)
-
-  priceList PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
-  product   Product   @relation(fields: [productId], references: [id])
-
-  @@unique([priceListId, productId, minQuantity])
-}
-
-model Warehouse {
-  id       String      @id @default(uuid())
-  code     String      @unique @db.VarChar(50)
-  name     String      @db.VarChar(255)
-  location String?
-  
-  inventories Inventory[]
-}
-
-model Inventory {
-  id               String   @id @default(uuid())
-  warehouseId      String  
-  productId        String  
-  quantityOnHand   Int      @default(0)
-  quantityReserved Int      @default(0)
-  lastUpdated      DateTime @default(now())
-
-  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
-  product   Product   @relation(fields: [productId], references: [id])
-
-  @@unique([warehouseId, productId])
-}
-
-model SalesOrder {
-  id              String      @id @default(uuid())
-  orderNo         String      @unique @db.VarChar(50)
-  customerId      String?    
-  totalAmount     Decimal     @db.Decimal(15, 2)
-  status          OrderStatus @default(DRAFT)
-  pipelineSource  String?     @db.VarChar(50)
-  deliveryAddress String?
-  createdAt       DateTime    @default(now())
-
-  customer       Partner?           @relation(fields: [customerId], references: [id])
-  orderDetails   SalesOrderDetail[]
-  deliveryOrders DeliveryOrder[]
-
-  @@index([status])
-}
-
-model SalesOrderDetail {
-  id        String  @id @default(uuid())
-  orderId   String 
-  productId String 
-  quantity  Int
-  unitPrice Decimal @db.Decimal(15, 2)
-  subtotal  Decimal @db.Decimal(15, 2)
-
-  order   SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product    @relation(fields: [productId], references: [id])
-}
-
-model PurchaseOrder {
-  id           String    @id @default(uuid())
-  poNo         String    @unique @db.VarChar(50)
-  supplierId   String?  
-  totalAmount  Decimal?  @db.Decimal(15, 2)
-  status       String    @default("DRAFT") @db.VarChar(50)
-  expectedDate DateTime? @db.Date
-  createdAt    DateTime  @default(now())
-
-  supplier Partner? @relation(fields: [supplierId], references: [id])
-}
-
-model DeliveryOrder {
-  id              String    @id @default(uuid())
-  salesOrderId    String?  
-  trackingCode    String?   @db.VarChar(100)
-  logisticPartner String?   @db.VarChar(50)
-  status          String    @default("PENDING") @db.VarChar(50)
-  shippedAt       DateTime?
-  createdAt       DateTime  @default(now())
-
-  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
-}
 
 model Customer {
-  id           String   @id @default(uuid())
-  metaUserId   String?  @map("meta_user_id") @db.VarChar(255)
-  platform     Platform?
-  fullName     String?  @map("full_name") @db.VarChar(255)
-  phone        String?  @db.VarChar(20)
-  email        String?  @db.VarChar(255)
-  avatarUrl    String?  @map("avatar_url") @db.Text
-  profileUrl   String?  @map("profile_url") @db.Text
-  address      String?  @db.Text
-  city         String?  @db.VarChar(100)
-  district     String?  @db.VarChar(100)
-  ward         String?  @db.VarChar(100)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id         String    @id @default(uuid())
+  metaUserId String?   @map("meta_user_id") @db.VarChar(255)
+  platform   Platform?
+  fullName   String?   @map("full_name") @db.VarChar(255)
+  phone      String?   @db.VarChar(20)
+  email      String?   @db.VarChar(255)
+  avatarUrl  String?   @map("avatar_url") @db.Text
+  profileUrl String?   @map("profile_url") @db.Text
+  address    String?   @db.Text
+  city       String?   @db.VarChar(100)
+  district   String?   @db.VarChar(100)
+  ward       String?   @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
 
   sources       CustomerSource[]
   conversations Conversation[]
@@ -232,74 +69,74 @@ model Customer {
 }
 
 model CustomerSource {
-  id           String     @id @default(uuid())
-  customerId   String     @map("customer_id")
-  pageId       String?    @map("page_id") @db.VarChar(255)
-  pageName     String?    @map("page_name") @db.VarChar(255)
+  id           String      @id @default(uuid())
+  customerId   String      @map("customer_id")
+  pageId       String?     @map("page_id") @db.VarChar(255)
+  pageName     String?     @map("page_name") @db.VarChar(255)
   sourceType   SourceType? @map("source_type")
-  campaignName String?    @map("campaign_name") @db.VarChar(255)
-  adsetName    String?    @map("adset_name") @db.VarChar(255)
-  adName       String?    @map("ad_name") @db.VarChar(255)
-  postId       String?    @map("post_id") @db.VarChar(255)
-  createdAt    DateTime   @default(now()) @map("created_at")
+  campaignName String?     @map("campaign_name") @db.VarChar(255)
+  adsetName    String?     @map("adset_name") @db.VarChar(255)
+  adName       String?     @map("ad_name") @db.VarChar(255)
+  postId       String?     @map("post_id") @db.VarChar(255)
+  createdAt    DateTime    @default(now()) @map("created_at")
 
-  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_sources")
 }
 
 model Conversation {
-  id              String             @id @default(uuid())
-  customerId      String             @map("customer_id")
-  platform        Platform?
-  conversationId  String?            @map("conversation_id") @db.VarChar(255)
-  startedAt       DateTime           @default(now()) @map("started_at")
-  lastMessageAt   DateTime           @default(now()) @map("last_message_at")
-  aiSummary       String?            @map("ai_summary") @db.Text
-  aiIntent        String?            @map("ai_intent") @db.VarChar(255)
-  status          ConversationStatus? @default(OPEN)
+  id             String              @id @default(uuid())
+  customerId     String              @map("customer_id")
+  platform       Platform?
+  conversationId String?             @map("conversation_id") @db.VarChar(255)
+  startedAt      DateTime            @default(now()) @map("started_at")
+  lastMessageAt  DateTime            @default(now()) @map("last_message_at")
+  aiSummary      String?             @map("ai_summary") @db.Text
+  aiIntent       String?             @map("ai_intent") @db.VarChar(255)
+  status         ConversationStatus? @default(OPEN)
 
-  customer        Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  messages        Message[]
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  messages Message[]
 
   @@map("conversations")
 }
 
 model Message {
-  id              String      @id @default(uuid())
-  conversationId  String      @map("conversation_id")
-  sender          SenderType?
-  messageType     MessageType? @map("message_type")
-  content         String?     @db.Text
-  attachmentUrl   String?     @map("attachment_url") @db.Text
-  createdAt       DateTime    @default(now()) @map("created_at")
+  id             String       @id @default(uuid())
+  conversationId String       @map("conversation_id")
+  sender         SenderType?
+  messageType    MessageType? @map("message_type")
+  content        String?      @db.Text
+  attachmentUrl  String?      @map("attachment_url") @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at")
 
-  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
 
 model CustomerInterest {
-  id           String    @id @default(uuid())
-  customerId   String    @map("customer_id")
-  productName  String?   @map("product_name") @db.VarChar(255)
-  quantity     Int?
-  budget       Decimal?  @db.Decimal(15, 2)
-  deadline     DateTime? @db.Date
-  note         String?   @db.Text
-  createdAt    DateTime  @default(now()) @map("created_at")
+  id          String    @id @default(uuid())
+  customerId  String    @map("customer_id")
+  productName String?   @map("product_name") @db.VarChar(255)
+  quantity    Int?
+  budget      Decimal?  @db.Decimal(15, 2)
+  deadline    DateTime? @db.Date
+  note        String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_interests")
 }
 
 model CustomerTag {
-  id           String    @id @default(uuid())
-  customerId   String    @map("customer_id")
-  tagName      String?   @map("tag_name") @db.VarChar(255)
+  id         String  @id @default(uuid())
+  customerId String  @map("customer_id")
+  tagName    String? @map("tag_name") @db.VarChar(255)
 
-  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_tags")
 }
@@ -313,7 +150,7 @@ model CustomerAi {
   nextAction          String?  @map("next_action") @db.Text
   updatedAt           DateTime @updatedAt @map("updated_at")
 
-  customer            Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_ai")
 }
