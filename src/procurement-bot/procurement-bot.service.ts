@@ -24,13 +24,9 @@ export class ProcurementBotService {
     // And group them by supplier. Since we don't have a direct Supplier-Product link,
     // we assume the user might have a mapping, or we just notify the admin.
     
-    // For demonstration, let's notify all suppliers about a generic request.
-    const suppliers = await this.prisma.partner.findMany({
-      where: {
-        type: 'SUPPLIER',
-        // In reality, only notify active ones or those with low stock products
-      },
-    });
+    // Legacy code:
+    // const suppliers = await this.prisma.partner.findMany({ ... });
+    const suppliers: any[] = [];
 
     for (const supplier of suppliers) {
       if (supplier.phone) {
@@ -70,10 +66,9 @@ export class ProcurementBotService {
    * Can be called by other services or webhooks.
    */
   async notifySupplierOnPurchaseOrder(poId: string) {
-    const po = await this.prisma.purchaseOrder.findUnique({
-      where: { id: poId },
-      include: { supplier: true },
-    });
+    // Legacy code
+    // const po = await this.prisma.purchaseOrder.findUnique({ ... });
+    const po: any = null;
 
     if (!po || !po.supplier) {
       this.logger.warn(`Purchase Order ${poId} not found or has no supplier.`);

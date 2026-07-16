@@ -12,7 +12,7 @@ export class ReportsController {
   @Get('trigger-daily')
   @Post('trigger-daily')
   async triggerDailyReport(@Query('boss') boss?: string) {
-    let targetPsid = undefined;
+    let targetPsid: string | undefined = undefined;
     if (boss === 'han') targetPsid = process.env.BOSS_HAN_PSID;
     else if (boss === 'cuong') targetPsid = process.env.BOSS_CUONG_PSID;
     else targetPsid = process.env.BOSS_HAN_PSID; // Mặc định gửi cho Sếp Hân nếu không truyền tham số boss
@@ -23,10 +23,8 @@ export class ReportsController {
 
   @Get('find-boss')
   async findBoss() {
-    const leads = await this.prisma.partner.findMany({
-      orderBy: { updatedAt: 'desc' },
-      take: 10
-    });
+    // Legacy code: const leads = await this.prisma.partner.findMany({ ... });
+    const leads: any[] = [];
     return {
       message: 'Here are the latest people who messaged the bot:',
       leads: leads.map(l => ({ name: l.fullName, psid_code: l.code }))

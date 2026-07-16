@@ -193,6 +193,8 @@ export class MetaController {
                       console.log(`[Order Extracted] for ${senderId}:`, parsedOrderData);
                       
                       if (parsedOrderData) {
+                        console.log('Found order data, but inline creation is disabled in favor of extract-orders-ai script.');
+                        /* Legacy logic commented out
                         // Tìm Partner ID để liên kết đơn hàng
                         let partner = await this.prisma.partner.findUnique({
                           where: { code: sessionId }
@@ -239,6 +241,7 @@ export class MetaController {
                           }
                         });
                         console.log('Order and Partner updated in Database successfully');
+                        */
                       }
                     } catch (e) {
                       console.error('Failed to parse or save order JSON', e);
