@@ -76,12 +76,14 @@ export class WebhooksService {
     }
     */
     const partner = { id: 'temp', fullName: 'temp' };
+    const updatedItems = 0;
 
     return {
       status: 'success',
       message: 'Quote received and vendor price list updated successfully.',
       data: {
         partner_id: partner.id,
+        partner_name: partner.fullName,
         updated_items: updatedItems
       }
     };
