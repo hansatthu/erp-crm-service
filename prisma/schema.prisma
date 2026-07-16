@@ -226,6 +226,7 @@ model Customer {
   conversations Conversation[]
   interests     CustomerInterest[]
   tags          CustomerTag[]
+  aiData        CustomerAi?
 
   @@map("customers")
 }
@@ -301,4 +302,18 @@ model CustomerTag {
   customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@map("customer_tags")
+}
+
+model CustomerAi {
+  id                  String   @id @default(uuid())
+  customerId          String   @unique @map("customer_id")
+  leadScore           Decimal? @map("lead_score") @db.Decimal(5, 2)
+  purchaseProbability Decimal? @map("purchase_probability") @db.Decimal(5, 2)
+  aiSummary           String?  @map("ai_summary") @db.Text
+  nextAction          String?  @map("next_action") @db.Text
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  customer            Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_ai")
 }
