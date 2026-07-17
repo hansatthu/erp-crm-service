@@ -41,15 +41,21 @@ export class MetaService implements OnModuleInit {
     }
   }
 
-  private getPageAccessToken(): string {
+  private getPageAccessToken(pageId?: string): string {
+    if (pageId) {
+      const specificToken = process.env[`META_PAGE_ACCESS_TOKEN_${pageId}`];
+      if (specificToken) {
+        return specificToken;
+      }
+    }
     return process.env.META_PAGE_ACCESS_TOKEN || '';
   }
 
   /**
    * Fetch user profile (name) from Meta Graph API
    */
-  async getUserProfile(psid: string): Promise<{ name?: string, first_name?: string, last_name?: string } | null> {
-    const accessToken = this.getPageAccessToken();
+  async getUserProfile(psid: string, pageId?: string): Promise<{ name?: string, first_name?: string, last_name?: string } | null> {
+    const accessToken = this.getPageAccessToken(pageId);
     if (!accessToken) return null;
 
     try {
@@ -72,8 +78,8 @@ export class MetaService implements OnModuleInit {
   /**
    * Add a custom label to a user (PSID)
    */
-  async addLabelToUser(psid: string, labelName: string): Promise<boolean> {
-    const accessToken = this.getPageAccessToken();
+  async addLabelToUser(psid: string, labelName: string, pageId?: string): Promise<boolean> {
+    const accessToken = this.getPageAccessToken(pageId);
     if (!accessToken) return false;
 
     try {
@@ -122,8 +128,8 @@ export class MetaService implements OnModuleInit {
   /**
    * Send a text message back to the user on Messenger
    */
-  async sendMessage(recipientId: string, text: string): Promise<any> {
-    const accessToken = this.getPageAccessToken();
+  async sendMessage(recipientId: string, text: string, pageId?: string): Promise<any> {
+    const accessToken = this.getPageAccessToken(pageId);
     if (!accessToken) {
       this.logger.warn('No META_PAGE_ACCESS_TOKEN configured. Cannot send message to Facebook.');
       return null;
@@ -160,8 +166,8 @@ export class MetaService implements OnModuleInit {
   /**
    * Send an Order Receipt Template to the user
    */
-  async sendOrderReceipt(recipientId: string, orderData: any): Promise<any> {
-    const accessToken = this.getPageAccessToken();
+  async sendOrderReceipt(recipientId: string, orderData: any, pageId?: string): Promise<any> {
+    const accessToken = this.getPageAccessToken(pageId);
     if (!accessToken) {
       this.logger.warn('No META_PAGE_ACCESS_TOKEN configured. Cannot send receipt.');
       return null;
@@ -222,8 +228,8 @@ export class MetaService implements OnModuleInit {
   /**
    * Send a sender action (e.g., typing_on, typing_off, mark_seen)
    */
-  async sendAction(recipientId: string, action: 'typing_on' | 'typing_off' | 'mark_seen'): Promise<any> {
-    const accessToken = this.getPageAccessToken();
+  async sendAction(recipientId: string, action: 'typing_on' | 'typing_off' | 'mark_seen', pageId?: string): Promise<any> {
+    const accessToken = this.getPageAccessToken(pageId);
     if (!accessToken) return null;
 
     try {
