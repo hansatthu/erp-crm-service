@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Controller('api/v1/meta')
 export class MetaController {
   private readonly verifyToken = process.env.META_VERIFY_TOKEN || 'geta_meta_verify_token';
-  private messageBuffers = new Map<string, { texts: string[], timer: NodeJS.Timeout | null }>();
+  private messageBuffers = new Map<string, { texts: string[], timer: NodeJS.Timeout | null, pageId?: string }>();
 
   constructor(
     private readonly aiAgentService: AiAgentService,
@@ -116,6 +116,7 @@ export class MetaController {
 
     if (body.object === 'page') {
       for (const entry of body.entry) {
+        const pageId = entry.id;
         if (!entry.messaging) continue;
         
         for (const webhookEvent of entry.messaging) {
@@ -134,7 +135,7 @@ export class MetaController {
 
             // Initialize buffer for this sender if it doesn't exist
             if (!this.messageBuffers.has(senderId)) {
-              this.messageBuffers.set(senderId, { texts: [], timer: null });
+              this.messageBuffers.set(senderId, { texts: [], timer: null, pageId });
             }
 
             const buffer = this.messageBuffers.get(senderId)!;
@@ -151,6 +152,7 @@ export class MetaController {
             buffer.timer = setTimeout(async () => {
               // Extract combined text and clear buffer
               const combinedText = buffer.texts.join(' ');
+              const savedPageId = buffer.pageId;
               this.messageBuffers.delete(senderId);
               
               console.log(`[Processing Combined Message from ${senderId}]: ${combinedText}`);
@@ -160,7 +162,7 @@ export class MetaController {
                 const sessionId = `meta_${senderId}`;
                 let customerName = '';
                 try {
-                  const profile = await this.metaService.getUserProfile(senderId);
+                  const profile = await this.metaService.getUserProfile(senderId, savedPageId);
                   if (profile && profile.name) customerName = profile.name;
                 } catch (e) {
                   console.warn('Could not fetch profile for', senderId);
@@ -254,7 +256,7 @@ export class MetaController {
                   for (const match of matches) {
                     const labelName = match[1].trim();
                     if (labelName) {
-                      this.metaService.addLabelToUser(senderId, labelName);
+                      this.metaService.addLabelToUser(senderId, labelName, savedPageId);
                     }
                   }
                   
@@ -272,13 +274,13 @@ export class MetaController {
                   const bubbles = normalizedResponse.split('|||').map(b => b.trim()).filter(b => b.length > 0);
                   for (const bubble of bubbles) {
                     // Hiển thị trạng thái "Đang soạn tin nhắn..."
-                    await this.metaService.sendAction(senderId, 'typing_on');
+                    await this.metaService.sendAction(senderId, 'typing_on', savedPageId);
 
                     // Tính toán thời gian gõ phím giả lập (Chậm hơn: 70ms/ký tự, tối thiểu 1.5s, tối đa 8s)
                     const typingDelay = Math.min(Math.max(1500, bubble.length * 70), 8000);
                     await new Promise(resolve => setTimeout(resolve, typingDelay));
 
-                    await this.metaService.sendMessage(senderId, bubble);
+                    await this.metaService.sendMessage(senderId, bubble, savedPageId);
                     
                     // Chờ thêm 1 chút trước khi gõ tin tiếp theo
                     await new Promise(resolve => setTimeout(resolve, 800));
@@ -287,7 +289,7 @@ export class MetaController {
                   // Nếu có Đơn Hàng thì gửi Thẻ Đơn Hàng cực đẹp
                   if (parsedOrderData) {
                     await new Promise(resolve => setTimeout(resolve, 1500));
-                    await this.metaService.sendOrderReceipt(senderId, parsedOrderData);
+                    await this.metaService.sendOrderReceipt(senderId, parsedOrderData, savedPageId);
                   }
                 }
               } catch (error) {
