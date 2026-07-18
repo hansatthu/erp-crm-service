@@ -173,14 +173,15 @@ export class MetaController {
                 // ==========================================
                 let dbConversation: any = null;
                 try {
-                  // 1. Tìm hoặc tạo Customer
+                  // 1. Tìm hoặc tạo Customer (Phân biệt rõ ràng bằng metaUserId VÀ pageId)
                   let customer = await this.prisma.customer.findFirst({
-                    where: { metaUserId: senderId, platform: 'FACEBOOK' }
+                    where: { metaUserId: senderId, pageId: savedPageId, platform: 'FACEBOOK' }
                   });
                   if (!customer) {
                     customer = await this.prisma.customer.create({
                       data: {
                         metaUserId: senderId,
+                        pageId: savedPageId,
                         platform: 'FACEBOOK',
                         fullName: customerName || 'Khách hàng FB',
                       }
@@ -194,12 +195,13 @@ export class MetaController {
 
                   // 2. Tìm hoặc tạo Conversation
                   dbConversation = await this.prisma.conversation.findFirst({
-                    where: { customerId: customer.id, platform: 'FACEBOOK', status: 'OPEN' }
+                    where: { customerId: customer.id, pageId: savedPageId, platform: 'FACEBOOK', status: 'OPEN' }
                   });
                   if (!dbConversation) {
                     dbConversation = await this.prisma.conversation.create({
                       data: {
                         customerId: customer.id,
+                        pageId: savedPageId,
                         platform: 'FACEBOOK',
                         conversationId: sessionId,
                         status: 'OPEN'

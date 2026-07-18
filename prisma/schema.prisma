@@ -46,6 +46,7 @@ enum MessageType {
 model Customer {
   id         String    @id @default(uuid())
   metaUserId String?   @map("meta_user_id") @db.VarChar(255)
+  pageId     String?   @map("page_id") @db.VarChar(255)
   platform   Platform?
   fullName   String?   @map("full_name") @db.VarChar(255)
   phone      String?   @db.VarChar(20)
@@ -90,6 +91,7 @@ model Conversation {
   id             String              @id @default(uuid())
   customerId     String              @map("customer_id")
   platform       Platform?
+  pageId         String?             @map("page_id") @db.VarChar(255)
   conversationId String?             @map("conversation_id") @db.VarChar(255)
   startedAt      DateTime            @default(now()) @map("started_at")
   lastMessageAt  DateTime            @default(now()) @map("last_message_at")

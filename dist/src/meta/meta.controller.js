@@ -158,12 +158,13 @@ let MetaController = class MetaController {
                                 let dbConversation = null;
                                 try {
                                     let customer = await this.prisma.customer.findFirst({
-                                        where: { metaUserId: senderId, platform: 'FACEBOOK' }
+                                        where: { metaUserId: senderId, pageId: savedPageId, platform: 'FACEBOOK' }
                                     });
                                     if (!customer) {
                                         customer = await this.prisma.customer.create({
                                             data: {
                                                 metaUserId: senderId,
+                                                pageId: savedPageId,
                                                 platform: 'FACEBOOK',
                                                 fullName: customerName || 'Khách hàng FB',
                                             }
@@ -176,12 +177,13 @@ let MetaController = class MetaController {
                                         });
                                     }
                                     dbConversation = await this.prisma.conversation.findFirst({
-                                        where: { customerId: customer.id, platform: 'FACEBOOK', status: 'OPEN' }
+                                        where: { customerId: customer.id, pageId: savedPageId, platform: 'FACEBOOK', status: 'OPEN' }
                                     });
                                     if (!dbConversation) {
                                         dbConversation = await this.prisma.conversation.create({
                                             data: {
                                                 customerId: customer.id,
+                                                pageId: savedPageId,
                                                 platform: 'FACEBOOK',
                                                 conversationId: sessionId,
                                                 status: 'OPEN'
