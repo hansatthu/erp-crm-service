@@ -167,11 +167,94 @@ export class MetaController {
                 } catch (e) {
                   console.warn('Could not fetch profile for', senderId);
                 }
+
+                // ==========================================
+                // LƯU DATABASE: Khách hàng & Tin nhắn đến
+                // ==========================================
+                let dbConversation: any = null;
+                try {
+                  // 1. Tìm hoặc tạo Customer
+                  let customer = await this.prisma.customer.findFirst({
+                    where: { metaUserId: senderId, platform: 'FACEBOOK' }
+                  });
+                  if (!customer) {
+                    customer = await this.prisma.customer.create({
+                      data: {
+                        metaUserId: senderId,
+                        platform: 'FACEBOOK',
+                        fullName: customerName || 'Khách hàng FB',
+                      }
+                    });
+                  } else if (customerName && customer.fullName !== customerName) {
+                    customer = await this.prisma.customer.update({
+                      where: { id: customer.id },
+                      data: { fullName: customerName }
+                    });
+                  }
+
+                  // 2. Tìm hoặc tạo Conversation
+                  dbConversation = await this.prisma.conversation.findFirst({
+                    where: { customerId: customer.id, platform: 'FACEBOOK', status: 'OPEN' }
+                  });
+                  if (!dbConversation) {
+                    dbConversation = await this.prisma.conversation.create({
+                      data: {
+                        customerId: customer.id,
+                        platform: 'FACEBOOK',
+                        conversationId: sessionId,
+                        status: 'OPEN'
+                      }
+                    });
+                  } else {
+                    dbConversation = await this.prisma.conversation.update({
+                      where: { id: dbConversation.id },
+                      data: { lastMessageAt: new Date() }
+                    });
+                  }
+
+                  // 3. Lưu tin nhắn của khách
+                  await this.prisma.message.create({
+                    data: {
+                      conversationId: dbConversation.id,
+                      sender: 'CUSTOMER',
+                      messageType: 'TEXT',
+                      content: combinedText
+                    }
+                  });
+                } catch (dbErr) {
+                  console.error('Error logging incoming message to DB:', dbErr);
+                }
+                // ==========================================
+
                 const aiResponse = await this.aiAgentService.processMessage(combinedText, sessionId, customerName);
                 
                 // Send back to Meta (handle multiple bubbles split by ||| or newlines)
                 if (aiResponse) {
                   console.log(`[AI Response to ${senderId}]: ${aiResponse}`);
+                  
+                  // ==========================================
+                  // LƯU DATABASE: Tin nhắn phản hồi của AI
+                  // ==========================================
+                  try {
+                    if (dbConversation) {
+                      await this.prisma.message.create({
+                        data: {
+                          conversationId: dbConversation.id,
+                          sender: 'AI',
+                          messageType: 'TEXT',
+                          content: aiResponse
+                        }
+                      });
+                      await this.prisma.conversation.update({
+                        where: { id: dbConversation.id },
+                        data: { lastMessageAt: new Date() }
+                      });
+                    }
+                  } catch (dbErr) {
+                    console.error('Error logging AI message to DB:', dbErr);
+                  }
+                  // ==========================================
+
                   let textToProcess = aiResponse;
 
                   // Trích xuất đơn hàng (JSON block) ở cuối tin nhắn nếu có
