@@ -400,4 +400,97 @@ export class MetaController {
 
     return { success: true };
   }
+
+  @Post('scan-unanswered')
+  async scanUnansweredMessages(@Req() req: Request) {
+    const host = req.get('host') || 'localhost:3000';
+    console.log('Starting scan for unanswered messages...');
+    
+    // Tìm các conversation đang OPEN, có tin nhắn, sắp xếp lấy tin nhắn mới nhất
+    const openConversations = await this.prisma.conversation.findMany({
+      where: { status: 'OPEN', platform: 'FACEBOOK' },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1
+        },
+        customer: true
+      }
+    });
+
+    let processedCount = 0;
+    // Các từ khóa cơ bản để xác định câu hỏi tư vấn
+    const keywords = ['giá', 'sao', 'nhiêu', 'tiền', 'tư vấn', 'ly', 'in', 'cái'];
+
+    for (const conv of openConversations) {
+      if (!conv.messages || conv.messages.length === 0) continue;
+      
+      const lastMessage = conv.messages[0];
+      
+      // Nếu tin cuối là của khách
+      if (lastMessage.sender === 'CUSTOMER') {
+        const text = lastMessage.content?.toLowerCase() || '';
+        
+        // Kiểm tra xem có chứa từ khóa không
+        const hasKeyword = keywords.some(kw => text.includes(kw));
+        if (hasKeyword && conv.customer.metaUserId) {
+          console.log(`[SCAN] Found unanswered message from ${conv.customer.fullName} (PSID: ${conv.customer.metaUserId}): ${lastMessage.content}`);
+          
+          try {
+            // Lấy AI response
+            const aiResponse = await this.aiAgentService.processMessage(
+              lastMessage.content || '', 
+              conv.conversationId || conv.customer.metaUserId, 
+              conv.customer.fullName || 'Khách hàng'
+            );
+            
+            if (aiResponse) {
+              // Lưu vào DB
+              await this.prisma.message.create({
+                data: {
+                  conversationId: conv.id,
+                  sender: 'AI',
+                  messageType: 'TEXT',
+                  content: aiResponse
+                }
+              });
+              await this.prisma.conversation.update({
+                where: { id: conv.id },
+                data: { lastMessageAt: new Date() }
+              });
+
+              // Xử lý gửi tin nhắn giống như webhook
+              let textToProcess = aiResponse;
+              textToProcess = textToProcess.replace(/\[CURRENT_HOST\]/g, host);
+
+              // Split bubbles
+              let normalizedResponse = textToProcess.replace(/\n+/g, '|||');
+              normalizedResponse = normalizedResponse.replace(/([.!?])\s+/g, '$1|||');
+              
+              const bubbles = normalizedResponse.split('|||').map(b => b.trim()).filter(b => b.length > 0);
+              const senderId = conv.customer.metaUserId;
+              const savedPageId = conv.pageId || undefined;
+
+              for (const bubble of bubbles) {
+                await this.metaService.sendAction(senderId, 'typing_on', savedPageId);
+                const typingDelay = Math.min(Math.max(1500, bubble.length * 70), 5000);
+                await new Promise(resolve => setTimeout(resolve, typingDelay));
+                await this.metaService.sendMessage(senderId, bubble, savedPageId);
+                await new Promise(resolve => setTimeout(resolve, 800)); // Nghỉ 0.8s giữa các bubble
+              }
+              
+              processedCount++;
+              // Nghỉ 3 giây giữa mỗi khách hàng để tránh bị đánh dấu là spam
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+          } catch (err) {
+            console.error(`[SCAN] Error processing unanswered message for ${conv.customer.metaUserId}:`, err);
+          }
+        }
+      }
+    }
+
+    console.log(`Finished scanning. Processed ${processedCount} unanswered messages.`);
+    return { success: true, processedCount };
+  }
 }

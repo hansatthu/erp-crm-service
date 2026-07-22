@@ -301,6 +301,72 @@ let MetaController = class MetaController {
         }
         return { success: true };
     }
+    async scanUnansweredMessages(req) {
+        const host = req.get('host') || 'localhost:3000';
+        console.log('Starting scan for unanswered messages...');
+        const openConversations = await this.prisma.conversation.findMany({
+            where: { status: 'OPEN', platform: 'FACEBOOK' },
+            include: {
+                messages: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1
+                },
+                customer: true
+            }
+        });
+        let processedCount = 0;
+        const keywords = ['giá', 'sao', 'nhiêu', 'tiền', 'tư vấn', 'ly', 'in', 'cái'];
+        for (const conv of openConversations) {
+            if (!conv.messages || conv.messages.length === 0)
+                continue;
+            const lastMessage = conv.messages[0];
+            if (lastMessage.sender === 'CUSTOMER') {
+                const text = lastMessage.content?.toLowerCase() || '';
+                const hasKeyword = keywords.some(kw => text.includes(kw));
+                if (hasKeyword && conv.customer.metaUserId) {
+                    console.log(`[SCAN] Found unanswered message from ${conv.customer.fullName} (PSID: ${conv.customer.metaUserId}): ${lastMessage.content}`);
+                    try {
+                        const aiResponse = await this.aiAgentService.processMessage(lastMessage.content || '', conv.conversationId || conv.customer.metaUserId, conv.customer.fullName || 'Khách hàng');
+                        if (aiResponse) {
+                            await this.prisma.message.create({
+                                data: {
+                                    conversationId: conv.id,
+                                    sender: 'AI',
+                                    messageType: 'TEXT',
+                                    content: aiResponse
+                                }
+                            });
+                            await this.prisma.conversation.update({
+                                where: { id: conv.id },
+                                data: { lastMessageAt: new Date() }
+                            });
+                            let textToProcess = aiResponse;
+                            textToProcess = textToProcess.replace(/\[CURRENT_HOST\]/g, host);
+                            let normalizedResponse = textToProcess.replace(/\n+/g, '|||');
+                            normalizedResponse = normalizedResponse.replace(/([.!?])\s+/g, '$1|||');
+                            const bubbles = normalizedResponse.split('|||').map(b => b.trim()).filter(b => b.length > 0);
+                            const senderId = conv.customer.metaUserId;
+                            const savedPageId = conv.pageId || undefined;
+                            for (const bubble of bubbles) {
+                                await this.metaService.sendAction(senderId, 'typing_on', savedPageId);
+                                const typingDelay = Math.min(Math.max(1500, bubble.length * 70), 5000);
+                                await new Promise(resolve => setTimeout(resolve, typingDelay));
+                                await this.metaService.sendMessage(senderId, bubble, savedPageId);
+                                await new Promise(resolve => setTimeout(resolve, 800));
+                            }
+                            processedCount++;
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+                        }
+                    }
+                    catch (err) {
+                        console.error(`[SCAN] Error processing unanswered message for ${conv.customer.metaUserId}:`, err);
+                    }
+                }
+            }
+        }
+        console.log(`Finished scanning. Processed ${processedCount} unanswered messages.`);
+        return { success: true, processedCount };
+    }
 };
 exports.MetaController = MetaController;
 __decorate([
@@ -338,6 +404,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MetaController.prototype, "submitOrder", null);
+__decorate([
+    (0, common_1.Post)('scan-unanswered'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MetaController.prototype, "scanUnansweredMessages", null);
 exports.MetaController = MetaController = __decorate([
     (0, common_1.Controller)('api/v1/meta'),
     __metadata("design:paramtypes", [ai_agent_service_1.AiAgentService,

@@ -454,5 +454,151 @@
       "assistant",
       "Dạ nếu bán trà sữa thì mình gợi ý ly 500ml hoặc 700ml kèm nắp cầu và ống hút đó bạn. Còn bán cà phê thì ly 360ml hoặc 500ml là chuẩn nha."
     ]
+  ],
+  "test-session-123": [
+    [
+      "user",
+      "Ly nắp cầu 500ml in logo 1 màu giá sao bạn?"
+    ],
+    [
+      "assistant",
+      "Dạ bạn ơi, ly PP 500ml nắp cầu bên mình đang có sẵn hàng nè 🥰\n\nBạn định in khoảng bao nhiêu cái để mình báo giá chính xác nha?"
+    ]
+  ],
+  "meta_27449733957954836": [
+    [
+      "user",
+      "Hoạt động lại chưa"
+    ],
+    [
+      "assistant",
+      "Dạ Geta Tây Ninh chào bạn ạ 😊\n\nBạn đang quan tâm mẫu ly nào bên mình vậy ạ?"
+    ],
+    [
+      "user",
+      "Ly 500"
+    ],
+    [
+      "assistant",
+      "Dạ, ly nhựa PP 500ml hay ly UKP 500ml vậy bạn? Hai loại này giá khác nhau đó ạ 😊\n\nBạn dùng để bán trà sữa hay cà phê ạ?"
+    ],
+    [
+      "user",
+      "Đúng rồi đó"
+    ],
+    [
+      "assistant",
+      "Dạ vâng hehe, vậy bạn lấy loại PP 500ml hay UKP 500ml ạ? Với bạn cần khoảng bao nhiêu cái để mình báo giá chính xác nha 😊"
+    ],
+    [
+      "user",
+      "Ly 500 UKP"
+    ],
+    [
+      "assistant",
+      "Dạ ly UKP 500ml bên mình giá như sau nha bạn:\n\n- 1 thùng (1000 cái): 569đ/cái\n- 3 thùng: 549đ/cái\n- 5 thùng: 529đ/cái\n- 10 thùng: 509đ/cái\n\nBạn lấy số lượng tầm bao nhiêu để mình báo giá chi tiết ạ? Với bạn có cần thêm nắp, ống hút hay túi không nè? 🥰"
+    ],
+    [
+      "user",
+      "In ly"
+    ],
+    [
+      "assistant",
+      "Dạ bạn in logo mẫu mới hay đã từng in bên mình rồi ạ? Với số lượng bạn lấy bao nhiêu ly để mình báo giá chi tiết nha 😊"
+    ],
+    [
+      "user",
+      "Test"
+    ],
+    [
+      "assistant",
+      "Dạ bạn in mẫu mới thì bên mình nhận tối thiểu 1000 ly nha, phí khởi tạo in lần đầu là 300.000đ + chi phí in 25đ/cái 🥰\n\nBạn lấy bao nhiêu ly để mình báo giá cụ thể ạ?"
+    ]
+  ],
+  "meta_999999999": [
+    [
+      "user",
+      "Test bot"
+    ],
+    [
+      "assistant",
+      "Dạ Geta Tây Ninh chào bạn ạ 😊 bạn đang quan tâm mẫu ly nào bên mình nè?"
+    ]
+  ],
+  "meta_37416193968026869": [
+    [
+      "user",
+      "In ly"
+    ],
+    [
+      "assistant",
+      "Dạ Geta Tây Ninh chào bạn ạ 😊 Bạn đang quan tâm mẫu ly nào bên mình nè? Bạn dùng để đựng trà sữa hay cà phê vậy?"
+    ],
+    [
+      "user",
+      "Giá ly 500 360 700"
+    ],
+    [
+      "assistant",
+      "Dạ bạn chờ mình xíu nha, mình check giá cho bạn liền 😊\n\nLy PP 500ml:\n- Giá lẻ 1 thùng: 549đ/cái\n- Giá lẻ 3 thùng: 529đ/cái\n- Giá lẻ 5 thùng: 509đ/cái\n- Giá lẻ 10 thùng: 489đ/cái\n\nLy 360ml:\n- Giá lẻ 1 thùng: 369đ/cái\n- Giá lẻ 3 thùng: 359đ/cái\n- Giá lẻ 5 thùng: 349đ/cái\n- Giá lẻ 10 thùng: 339đ/cái\n\nLy PP 700ml:\n- Giá lẻ 1 thùng: 619đ/cái\n- Giá lẻ 3 thùng: 599đ/cái\n- Giá lẻ 5 thùng: 579đ/cái\n- Giá lẻ 10 thùng: 559đ/cái\n\nBạn định lấy bao nhiêu thùng vậy? Mình báo giá chính xác cho bạn nha 🥰"
+    ],
+    [
+      "user",
+      "Mình lấy 7 thùng"
+    ],
+    [
+      "assistant",
+      "Dạ 7 thùng mình áp giá lẻ 5 thùng cho bạn nha 🥰\n\nLy PP 500ml: 509đ/cái\nLy 360ml: 349đ/cái\nLy PP 700ml: 579đ/cái\n\nBạn muốn lấy loại nào vậy? Hay lấy hết 3 loại luôn ạ? \n\nMà bạn có cần thêm nắp, ống hút, túi gì kèm không nè? Bên mình có combo luôn đó 😊"
+    ],
+    [
+      "user",
+      "Giá ly 360"
+    ],
+    [
+      "assistant",
+      "Dạ ly 360ml bên mình giá như sau nha bạn:\n\n- 1 thùng: 369đ/cái\n- 3 thùng: 359đ/cái\n- 5 thùng: 349đ/cái\n- 10 thùng: 339đ/cái\n\nBạn lấy 7 thùng mình áp giá 5 thùng là 349đ/cái cho bạn nha 🥰\n\nTổng: 7 thùng x 1000 cái x 349đ = 2.443.000đ\n\nBạn có cần in logo không ạ? Hay lấy luôn nắp với ống hút cho tiện? 😊"
+    ],
+    [
+      "user",
+      "Lấy 20 thùng"
+    ],
+    [
+      "assistant",
+      "Dạ 20 thùng mình áp giá đại lý cho bạn nha 🥰\n\nLy 360ml giá ĐL (≥10 thùng): 319đ/cái\n\nTổng: 20 thùng x 1000 cái x 319đ = 6.380.000đ\n\nBạn có cần in logo không ạ? Bên mình tặng thiết kế miễn phí luôn nè 😊\n\nMà bạn lấy nhiều vậy, có cần thêm nắp, ống hút, túi gì kèm không? Để mình báo combo cho bạn luôn nha 🥰"
+    ],
+    [
+      "user",
+      "Dạ"
+    ],
+    [
+      "assistant",
+      "Dạ bạn cho mình xin Tên, SĐT và Địa chỉ để lên đơn nha 🥰\n\nÀ mà bạn có cần in logo không? Hay lấy thêm nắp, ống hút, túi gì kèm không ạ? Để mình báo giá combo cho bạn luôn nè 😊"
+    ],
+    [
+      "user",
+      "Lấy"
+    ],
+    [
+      "assistant",
+      "Dạ bạn cho mình xin thông tin để lên đơn nha 😊\n\nTên bạn là gì? SĐT và địa chỉ giao hàng đâu ạ?\n\nMà bạn có lấy thêm nắp với ống hút kèm không? Để mình báo combo cho bạn luôn nè 🥰"
+    ]
+  ],
+  "meta_27951205341153987": [
+    [
+      "user",
+      "In ly 700"
+    ],
+    [
+      "assistant",
+      "Dạ Geta Tây Ninh chào bạn ạ 😊 Bạn đang quan tâm mẫu ly 700ml nào bên mình nè? Ly PP hay UKP vậy bạn ơi?"
+    ],
+    [
+      "user",
+      "bớt icon đi bạn"
+    ],
+    [
+      "assistant",
+      "Dạ vâng, để mình báo giá luôn cho bạn nha\n\nLy PP 700ml bên mình giá lẻ 1 thùng (1000 cái) là 619đ/cái\nLy UKP 700ml giá 699đ/cái\n\nBạn định lấy khoảng mấy thùng để mình báo giá sỉ tốt nhất cho bạn ạ?"
+    ]
   ]
 }
