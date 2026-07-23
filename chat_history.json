@@ -513,6 +513,22 @@
     [
       "assistant",
       "Dạ bạn in mẫu mới thì bên mình nhận tối thiểu 1000 ly nha, phí khởi tạo in lần đầu là 300.000đ + chi phí in 25đ/cái 🥰\n\nBạn lấy bao nhiêu ly để mình báo giá cụ thể ạ?"
+    ],
+    [
+      "user",
+      "Test"
+    ],
+    [
+      "assistant",
+      "Dạ vâng bạn ơi, mình test thì cũng cần biết số lượng bạn lấy bao nhiêu ly để báo giá chính xác nè 😊\n\nVí dụ bạn lấy 1 thùng (1000 ly) UKP 500ml in logo mới thì chi phí sẽ là:\n\n- Ly: 1000 x 569đ = 569.000đ\n- Phí khởi tạo in: 300.000đ\n- Chi phí in: 1000 x 25đ = 25.000đ\nTổng: 894.000đ\n\nBạn dự định lấy bao nhiêu thùng vậy ạ?"
+    ],
+    [
+      "user",
+      "Test"
+    ],
+    [
+      "assistant",
+      "Dạ bạn ơi, mình thấy bạn hỏi test mấy lần rồi mà chưa chốt số lượng cụ thể nè 😅\n\nBạn cho mình biết lấy thật bao nhiêu thùng UKP 500ml để mình báo giá chi tiết + tư vấn combo nắp, ống hút, túi luôn cho tiện nha 🥰"
     ]
   ],
   "meta_999999999": [
@@ -599,6 +615,48 @@
     [
       "assistant",
       "Dạ vâng, để mình báo giá luôn cho bạn nha\n\nLy PP 700ml bên mình giá lẻ 1 thùng (1000 cái) là 619đ/cái\nLy UKP 700ml giá 699đ/cái\n\nBạn định lấy khoảng mấy thùng để mình báo giá sỉ tốt nhất cho bạn ạ?"
+    ]
+  ],
+  "meta_37254269077520741": [
+    [
+      "user",
+      "hi bạn cần tư vấn ly"
+    ],
+    [
+      "assistant",
+      "Dạ Geta Tây Ninh chào bạn ạ 😊 Bạn đang quan tâm mẫu ly nào bên mình nè? Ly trà sữa, cà phê hay nước ép vậy bạn ơi?"
+    ],
+    [
+      "user",
+      "cần ly 500 đó bạn"
+    ],
+    [
+      "assistant",
+      "Dạ, mình có 2 dòng ly 500ml đang hot nè:\n\n1. Ly nhựa PP 500ml - giá lẻ 1 thùng (1000 cái) chỉ 549đ/cái\n2. Ly UKP 500ml - giá lẻ 1 thùng (1000 cái) chỉ 569đ/cái\n\nBạn bán đồ uống gì để mình tư vấn dòng phù hợp nhất nha 🥰"
+    ],
+    [
+      "user",
+      "mình bán rau má, và nước dừa"
+    ],
+    [
+      "assistant",
+      "Dạ vậy mình khuyên bạn nên lấy dòng **Ly nhựa PP 500ml** nha 😊\n\nVì ly PP cứng cáp, đựng nước dừa, rau má lắc đá hay đá bi đều ok, không bị mềm hay rạn như mấy dòng ly mỏng khác.\n\nGiá 1 thùng (1000 cái) chỉ **549đ/cái** thôi ạ ||| Bạn lấy tầm bao nhiêu thùng để mình báo giá sỉ rẻ hơn nữa nè?"
+    ],
+    [
+      "user",
+      "ly 500 có nhỏ quá không bạn"
+    ],
+    [
+      "assistant",
+      "Dạ không nhỏ đâu bạn ơi 😊 Ly 500ml đựng nước dừa, rau má là chuẩn bài luôn á.\n\nNếu bạn bán mang đi, khách uống tại chỗ hoặc mua về thì 500ml là size phổ biến nhất thị trường luôn nè.\n\nCòn nếu bạn muốn size lớn hơn thì bên mình có ly 700ml nữa, giá 1 thùng (1000 cái) chỉ **619đ/cái** thôi ạ || Bạn lấy size nào để mình báo giá luôn nha 🥰"
+    ],
+    [
+      "user",
+      "thường thì ngta hay dùng loại nào"
+    ],
+    [
+      "assistant",
+      "Dạ thường thì các bạn bán rau má, nước dừa hay lấy size **Ly nhựa PP 500ml** là nhiều nhất, vì:\n\n- Vừa tay cầm, khách uống không bị ngán\n- Giá thành hợp lý, lời được nhiều\n- Đựng đá bi, đá lắc đều ok hết\n\nCòn nếu bạn bán nước dừa nguyên trái, hoặc ly lớn cho khách ngồi lại thì mới cần 700ml thôi ạ || Bạn định lấy tầm mấy thùng để mình báo giá sỉ rẻ nhất cho bạn luôn nè 😊"
     ]
   ]
 }
