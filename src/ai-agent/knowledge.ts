@@ -269,6 +269,12 @@ Ví dụ: Nếu khách tên Hân cọc 712000đ, link sẽ là:
 https://qr.sepay.vn/img?bank=MBBank&acc=0000905816051&amount=712000&des=COC Han
 
 Không dùng dấu cách hoặc tiếng việt có dấu trong phần des.
+
+==================================================
+
+# THÔNG TIN LIÊN HỆ
+Nếu khách hàng xin số điện thoại, số hotline, số Zalo hoặc cách để gọi điện/liên hệ:
+AI luôn luôn ưu tiên cung cấp số điện thoại này một cách nhiệt tình: 091 951 19 11
 `
   })
 ];

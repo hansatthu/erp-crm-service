@@ -15,6 +15,7 @@ export declare class MetaController {
     submitOrder(body: any): Promise<{
         success: boolean;
     }>;
+    handleCronScanUnanswered(): Promise<void>;
     scanUnansweredMessages(req: Request): Promise<{
         success: boolean;
         processedCount: number;

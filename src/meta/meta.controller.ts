@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Query, Req, Res, HttpStatus } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import type { Request, Response } from 'express';
 import { AiAgentService } from '../ai-agent/ai-agent.service';
 import { MetaService } from './meta.service';
@@ -401,9 +402,16 @@ export class MetaController {
     return { success: true };
   }
 
+  // Tự động chạy quét mỗi 5 phút để dọn dẹp tin nhắn bị miss do timeout
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async handleCronScanUnanswered() {
+    console.log('[CRON] Tự động chạy quét tin nhắn chưa rep...');
+    await this.scanUnansweredMessages({ get: () => 'localhost:3000' } as any);
+  }
+
   @Post('scan-unanswered')
   async scanUnansweredMessages(@Req() req: Request) {
-    const host = req.get('host') || 'localhost:3000';
+    const host = req && req.get ? (req.get('host') || 'localhost:3000') : 'localhost:3000';
     console.log('Starting scan for unanswered messages...');
     
     // Tìm các conversation đang OPEN, có tin nhắn, sắp xếp lấy tin nhắn mới nhất

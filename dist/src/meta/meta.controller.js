@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetaController = void 0;
 const common_1 = require("@nestjs/common");
+const schedule_1 = require("@nestjs/schedule");
 const ai_agent_service_1 = require("../ai-agent/ai-agent.service");
 const meta_service_1 = require("./meta.service");
 const prisma_service_1 = require("../prisma/prisma.service");
@@ -301,8 +302,12 @@ let MetaController = class MetaController {
         }
         return { success: true };
     }
+    async handleCronScanUnanswered() {
+        console.log('[CRON] Tự động chạy quét tin nhắn chưa rep...');
+        await this.scanUnansweredMessages({ get: () => 'localhost:3000' });
+    }
     async scanUnansweredMessages(req) {
-        const host = req.get('host') || 'localhost:3000';
+        const host = req && req.get ? (req.get('host') || 'localhost:3000') : 'localhost:3000';
         console.log('Starting scan for unanswered messages...');
         const openConversations = await this.prisma.conversation.findMany({
             where: { status: 'OPEN', platform: 'FACEBOOK' },
@@ -404,6 +409,12 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MetaController.prototype, "submitOrder", null);
+__decorate([
+    (0, schedule_1.Cron)(schedule_1.CronExpression.EVERY_5_MINUTES),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MetaController.prototype, "handleCronScanUnanswered", null);
 __decorate([
     (0, common_1.Post)('scan-unanswered'),
     __param(0, (0, common_1.Req)()),

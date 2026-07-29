@@ -258,7 +258,7 @@ ${context}
                 response = await Promise.race([
                     llm.invoke(messages),
                     new Promise((_, reject) => {
-                        timeoutId = setTimeout(() => reject(new Error('LLM Timeout (Rate Limited)')), 15000);
+                        timeoutId = setTimeout(() => reject(new Error('LLM Timeout (Rate Limited)')), 45000);
                     })
                 ]);
             }
