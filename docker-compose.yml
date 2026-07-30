@@ -13,3 +13,16 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: geta-ngrok
+    restart: always
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command:
+      - "http"
+      - "backend:3000"
+      - "--domain=morphine-tidings-delicate.ngrok-free.dev"
+    depends_on:
+      - backend
