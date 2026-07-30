@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ZaloModule } from './zalo/zalo.module';
 import { AiAgentModule } from './ai-agent/ai-agent.module';
 import { MetaModule } from './meta/meta.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { MetaModule } from './meta/meta.module';
     ScheduleModule.forRoot(),
     ZaloModule,
     AiAgentModule,
-    MetaModule
+    MetaModule,
+    PaymentModule
   ],
   controllers: [],
   providers: [],
