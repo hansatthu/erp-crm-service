@@ -37,4 +37,36 @@ export class AdminController {
   deleteProduct(@Param('id') id: string) {
     return this.adminService.deleteProduct(id);
   }
+
+  // ============ Học có admin đánh giá ============
+
+  @Get('conversations')
+  listConversations() {
+    return this.adminService.listConversations();
+  }
+
+  @Get('conversations/:id')
+  getConversation(@Param('id') id: string) {
+    return this.adminService.getConversation(id);
+  }
+
+  @Post('messages/:messageId/rate')
+  rateMessage(@Param('messageId') messageId: string, @Body() body: { rating: string; editedReply?: string; note?: string }) {
+    return this.adminService.rateMessage(messageId, body);
+  }
+
+  @Get('learned-knowledge')
+  listLearnedKnowledge() {
+    return this.adminService.listLearnedKnowledge();
+  }
+
+  @Post('learned-knowledge')
+  upsertKnowledge(@Body() body: { id?: string; question: string; answer: string }) {
+    return this.adminService.upsertKnowledge(body);
+  }
+
+  @Delete('learned-knowledge/:id')
+  deleteKnowledge(@Param('id') id: string) {
+    return this.adminService.deleteKnowledge(id);
+  }
 }

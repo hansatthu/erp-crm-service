@@ -214,8 +214,107 @@ Ví dụ:
   }
 
   /**
+   * Truy vấn các QA mẫu mà bot đã học (từ hội thoại được admin đánh giá tốt / sửa)
+   * và chọn những mẫu liên quan nhất tới câu hỏi hiện tại.
+   */
+  async getLearnedKnowledge(text: string, limit = 4): Promise<string> {
+    try {
+      const all = await this.prisma.learnedKnowledge.findMany({
+        orderBy: [{ upvotes: 'desc' }, { used: 'asc' }],
+        take: 50,
+      });
+      if (!all.length) return '';
+
+      const q = text.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const scored = all.map(k => {
+        const kq = (k.question || '').toLowerCase();
+        const ka = (k.answer || '').toLowerCase();
+        const hay = `${kq} ${ka}`;
+        const score = q.filter(w => hay.includes(w)).length;
+        return { k, score };
+      }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);
+
+      if (!scored.length) return '';
+
+      // Ghi nhận lượt đã sử dụng để admin biết mẫu nào hay được dùng
+      try {
+        await this.prisma.learnedKnowledge.updateMany({
+          where: { id: { in: scored.map(x => x.k.id) } },
+          data: { used: { increment: 1 } },
+        });
+      } catch (e) {
+        this.logger.warn('Failed to increment knowledge usage', e);
+      }
+
+      const block = scored.map(({ k }) => `- Câu hỏi khách: "${k.question}"\n  → Cách tư vấn tốt (đã được đánh giá): "${k.answer}"`).join('\n\n');
+      return `\n\n# KIẾN THỨC HỌC ĐƯỢC TỪ CÁC KHÁCH HÀNG TRƯỚC (THAM KHẢO)\nDưới đây là cách bot đã tư vấn hiệu quả cho các khách hàng trước (được admin duyệt). Hãy tham khảo để trả lời tự nhiên, chính xác tương tự:\n${block}\n(Chỉ dùng làm tham khảo, không nhắc tên hay thông tin khách hàng trước cho khách hiện tại.)`;
+    } catch (e) {
+      this.logger.warn('Failed to load learned knowledge', e);
+      return '';
+    }
+  }
+
+  /**
+   * Admin đánh giá tốt một câu trả lời → bot học từ đó.
+   */
+  async approveKnowledge(question: string, answer: string, source?: string) {
+    if (!question || !answer) return null;
+    const existing = await this.prisma.learnedKnowledge.findFirst({
+      where: { question: { equals: question }, answer: { equals: answer } },
+    });
+    if (existing) {
+      return this.prisma.learnedKnowledge.update({
+        where: { id: existing.id },
+        data: { upvotes: { increment: 1 } },
+      });
+    }
+    return this.prisma.learnedKnowledge.create({
+      data: { question, answer, source },
+    });
+  }
+
+  /**
    * Process incoming messages from Meta or Zalo
    */
+  /**
+   * Loại bỏ mọi dạng "quá trình suy luận/thinking" lỡ bị model trả ra cùng câu trả lời.
+   * Xử lý được 2 dạng phổ biến:
+   *  1) Chuỗi agent của LangChain: "Thought: ... Action: ... Action Input: ..."
+   *  2) Đoạn cân nhắc nội bộ trước câu trả lời cuối (model giải thích từng bước).
+   */
+  private stripReasoning(raw: string): string {
+    if (!raw) return raw;
+    let text = raw;
+
+    // Dạng 1: agent_scratchpad của LangChain. Nếu có nhãn "Final Answer:",
+    // lấy đúng phần sau nhãn đó (kết quả cuối) — bỏ toàn bộ chuỗi Thought/Action phía trước.
+    const finalMatch = text.match(/Final\s+Answer\s*:\s*/i);
+    if (finalMatch && finalMatch.index !== undefined) {
+      text = text.slice(finalMatch.index + finalMatch[0].length).trim();
+    } else {
+      // Không có "Final Answer:" → loại bỏ từng vòng Thought/Action thừa đầu dòng.
+      const actionSteps = /(^\s*Thought\s*:.*\n?)(?=\s*(?:Action|Final|$))|^\s*Action\s*(?:Input)?\s*:.*\n?/gim;
+      for (let i = 0; i < 20; i++) {
+        const next = text.replace(actionSteps, '').trim();
+        if (next === text) break;
+        text = next;
+      }
+    }
+
+    // Dạng 2: DeepSeek reasoning_content có thể bị nối vào content.
+    // Nếu còn các nhãn suy luận đầu dòng, cắt bỏ phần suy luận.
+    const reasoningPrefix = /^[\s\S]*?\n(?=(Dạ|Chào|Xin chào|Em|Mình|Bạn|Anh|Chị|Để em|Dạ em|Kết quả|Tóm lại|Vậy))/i;
+    // Chỉ áp dụng nếu có dấu hiệu reasoning (đoạn quá dài, nhiều dòng giải thích nội bộ).
+    if (/em (đang|sẽ|cân nhắc|tính)|tôi sẽ|đầu tiên,|trước tiên,|bước 1[:\s]|để giải quyết|suy luận/i.test(text)) {
+      const m = text.match(reasoningPrefix);
+      if (m) {
+        text = text.slice(m[0].length).trim();
+      }
+    }
+
+    return text.trim();
+  }
+
   async processMessage(text: string, sessionId: string, customerName?: string, pageId?: string): Promise<string> {
     if (!process.env.DEEPSEEK_API_KEY) {
       this.logger.warn('DEEPSEEK_API_KEY is missing, throwing error to prevent sending message.');
@@ -280,11 +379,30 @@ Ví dụ:
       }
 
       // Prepend the persona context to the rules
-      const fullSystemPrompt = `# VAI TRÒ
+      const reasoningBan = `
+==================================================
+# 0. QUY TẮC TUYỆT ĐỐI (BẮT BUỘC)
+- CHỈ trả lời bằng câu trả lời CUỐI CÙNG dành cho khách hàng.
+- TUYỆT ĐỐI KHÔNG được đưa ra/hiển thị quá trình suy luận, các bước phân tích,
+  lý do nội bộ, hay mô tả "em đang nghĩ/em tính toán/em cân nhắc" vào tin nhắn trả về.
+- Không kể lại cách em tìm kiếm hay xử lý. Khách chỉ cần kết quả.
+- Đầu ra phải bắt đầu ngay bằng lời trả lời tự nhiên (VD: "Dạ em gửi mình...", "Dạ được ạ...").
+==================================================
+`;
+
+      let fullSystemPrompt = `# VAI TRÒ
 Bạn là nhân viên tư vấn của xưởng in GETA Tây Ninh.
 TUYỆT ĐỐI KHÔNG nhận mình là AI, trợ lý ảo. Bạn là người thật 100%.${customerInfo}
 
+${reasoningBan}
+
 ${rawPrompt}`;
+
+      // Bơm kiến thức đã học từ các hội thoại được admin đánh giá tốt
+      const learned = await this.getLearnedKnowledge(text);
+      if (learned) {
+        fullSystemPrompt += learned;
+      }
 
       const systemPrompt = fullSystemPrompt;
       const history = this.chatHistories.get(sessionId) || [];
@@ -337,6 +455,9 @@ ${rawPrompt}`;
         this.logger.warn(`Agent returned error text for session ${sessionId}: "${textToProcess}". Sending graceful reply.`);
         return 'Dạ anh/chị ơi, em đang tra cứu thông tin giúp anh/chị. Anh/chị chờ em chút rồi em trả lời ngay nhé!';
       }
+
+      // Loại bỏ mọi dạng "quá trình suy nghĩ" bị lộ ra khỏi tin nhắn gửi khách.
+      textToProcess = this.stripReasoning(textToProcess);
 
       const labelRegex = /\[LABEL:\s*([^\]]+)\]/i;
       const labelMatch = textToProcess.match(labelRegex);

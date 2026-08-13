@@ -35,6 +35,7 @@
         <h5 class="text-center mb-4">Geta Admin</h5>
         <a href="#" class="active" id="nav-rules" onclick="switchTab('rules')">Kịch Bản Tư Vấn</a>
         <a href="#" id="nav-products" onclick="switchTab('products')">Sản Phẩm</a>
+        <a href="#" id="nav-learn" onclick="switchTab('learn')">Bot Học</a>
         <a href="#" onclick="logout()" class="text-danger mt-5">Đăng xuất</a>
       </div>
 
@@ -51,25 +52,116 @@
 
         <!-- Products Tab -->
         <div id="tab-products" style="display: none;">
-          <h4>Quản Lý Sản Phẩm</h4>
-          <p class="text-muted">Danh sách sản phẩm được đồng bộ để AI dùng cho báo giá.</p>
-          <button class="btn btn-primary mb-3" onclick="showProductModal()">Thêm Sản Phẩm</button>
-          
-          <table class="table table-bordered table-striped bg-white">
-            <thead class="table-dark">
-              <tr>
-                <th>SKU</th>
-                <th>Tên SP</th>
-                <th>Giá Lẻ (VNĐ)</th>
-                <th>Giá Sỉ (VNĐ)</th>
-                <th>In Ấn (VNĐ)</th>
-                <th>Hành Động</th>
-              </tr>
-            </thead>
-            <tbody id="products-table"></tbody>
-          </table>
+          <h4>Bảng Giá Sản Phẩm</h4>
+          <p class="text-muted">Sửa trực tiếp trên bảng, sau đó nhấn <b>Lưu Tất Cả</b>. Mốc giá tự điền khi để trống.</p>
+
+          <div class="row mb-3 align-items-center">
+            <div class="col-md-4">
+              <input type="text" id="prod-search" class="form-control" placeholder="🔍 Tìm theo tên / SKU..." oninput="renderProducts()">
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <span class="input-group-text">Điều chỉnh % toàn cột:</span>
+                <input type="number" id="bulk-pct" class="form-control" value="5" step="0.5">
+              </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <button class="btn btn-outline-danger btn-sm" onclick="applyBulkPct()">Áp dụng +5%</button>
+              <button class="btn btn-outline-success btn-sm" onclick="applyBulkPct(-1)">Áp dụng -5%</button>
+              <button class="btn btn-primary" onclick="showProductModal()">Thêm Sản Phẩm</button>
+              <button class="btn btn-success" onclick="saveAllProducts()">💾 Lưu Tất Cả</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped bg-white table-sm align-middle">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th rowspan="2" style="min-width:150px">SKU</th>
+                  <th rowspan="2" style="min-width:160px">Tên SP</th>
+                  <th rowspan="2">Đơn vị</th>
+                  <th rowspan="2">Ghi chú</th>
+                  <th colspan="4">Giá Bán Lẻ (đ/cái)</th>
+                  <th colspan="3">Giá Sỉ (đ/cái)</th>
+                  <th rowspan="2">Phí in (đ/cái)</th>
+                  <th rowspan="2">In logo?</th>
+                  <th rowspan="2">Xóa</th>
+                </tr>
+                <tr>
+                  <th>1+</th><th>3+</th><th>5+</th><th>10+</th>
+                  <th>10+</th><th>30+</th><th>50+</th>
+                </tr>
+              </thead>
+              <tbody id="products-table"></tbody>
+            </table>
+          </div>
+          <p class="text-muted small">Ô nào để trống khi lưu sẽ tự động suy ra từ mốc gần nhất (đảm bảo giá giảm dần theo số lượng).</p>
         </div>
 
+        <!-- Bot Học Tab -->
+        <div id="tab-learn" style="display: none;">
+          <h4>Bot Học (Đánh giá & Kiến thức)</h4>
+          <p class="text-muted">
+            Duyệt chat với khách và đánh giá câu trả lời của bot. Bot sẽ học từ câu trả lời 
+            <span class="badge bg-success">Tốt</span> hoặc bạn đã <span class="badge bg-warning">Sửa</span> để tư vấn tốt hơn cho khách sau.
+          </p>
+
+          <ul class="nav nav-tabs" id="learnTabs">
+            <li class="nav-item"><a class="nav-link active" data-target="conversations" onclick="switchLearnTab('conversations')" href="#">Duyệt Chat</a></li>
+            <li class="nav-item"><a class="nav-link" data-target="knowledge" onclick="switchLearnTab('knowledge')" href="#">Kiến Thức Đã Học</a></li>
+          </ul>
+
+          <div id="learn-conversations" class="mt-3">
+            <div class="row">
+              <div class="col-md-5">
+                <div class="list-group" id="conv-list"></div>
+              </div>
+              <div class="col-md-7">
+                <div id="conv-detail" class="border rounded p-3 bg-white">
+                  <p class="text-muted">Chọn một hội thoại bên trái để xem chi tiết và đánh giá.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="learn-knowledge" class="mt-3" style="display: none;">
+            <button class="btn btn-primary mb-3" onclick="showKbModal()">Thêm Kiến Thức</button>
+            <table class="table table-bordered table-striped bg-white">
+              <thead class="table-dark">
+                <tr>
+                  <th style="width:30%">Câu Hỏi</th>
+                  <th>Cách Trả Lời Tốt</th>
+                  <th style="width:90px">👍Upvote</th>
+                  <th style="width:90px">Đã Dùng</th>
+                  <th style="width:110px">Hành Động</th>
+                </tr>
+              </thead>
+              <tbody id="kb-table"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Knowledge Modal -->
+  <div class="modal fade" id="kbModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Kiến Thức Bot</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="kb-id">
+          <div class="mb-2"><label>Câu hỏi của khách</label><textarea id="kb-question" class="form-control" rows="2"></textarea></div>
+          <div class="mb-2"><label>Cách tư vấn tốt (đáp án)</label><textarea id="kb-answer" class="form-control" rows="4"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="saveKb()">Lưu</button>
+        </div>
       </div>
     </div>
   </div>
@@ -86,12 +178,18 @@
           <input type="hidden" id="prod-id">
           <div class="mb-2"><label>SKU</label><input type="text" id="prod-sku" class="form-control"></div>
           <div class="mb-2"><label>Tên</label><input type="text" id="prod-name" class="form-control"></div>
-          <div class="mb-2"><label>Đơn vị</label><input type="text" id="prod-unit" class="form-control" value="thùng"></div>
+          <div class="mb-2"><label>Đơn vị</label><input type="text" id="prod-unit" class="form-control" value="Cái"></div>
+          <div class="mb-2"><label>Giá lẻ (1+)</label><input type="number" id="prod-retailPrice1" class="form-control"></div>
           <div class="row">
-            <div class="col"><label>Giá Lẻ 1 Thùng</label><input type="number" id="prod-retailPrice1" class="form-control"></div>
-            <div class="col"><label>Giá Sỉ 10 Thùng</label><input type="number" id="prod-agentPrice10" class="form-control"></div>
+            <div class="col"><label>Giá Sỉ 10+</label><input type="number" id="prod-agentPrice10" class="form-control"></div>
+            <div class="col"><label>Phí in (đ/cái)</label><input type="number" id="prod-printFeePerItem" class="form-control"></div>
           </div>
-          <div class="mb-2 mt-2"><label>Chi phí in (VNĐ)</label><input type="number" id="prod-printFeePerItem" class="form-control"></div>
+          <div class="form-check mt-2">
+            <input type="checkbox" class="form-check-input" id="prod-isPrintable">
+            <label class="form-check-label" for="prod-isPrintable">Có in logo</label>
+          </div>
+          <div class="mb-2 mt-2"><label>Ghi chú (VD: In logo / Không in / Giá/thùng)</label><input type="text" id="prod-note" class="form-control"></div>
+          <p class="text-muted small mb-0">Các mốc giá khác sẽ tự động suy ra từ mốc 1+ / sỉ 10+.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -152,8 +250,19 @@
     function switchTab(tab) {
       document.getElementById('tab-rules').style.display = tab === 'rules' ? 'block' : 'none';
       document.getElementById('tab-products').style.display = tab === 'products' ? 'block' : 'none';
+      document.getElementById('tab-learn').style.display = tab === 'learn' ? 'block' : 'none';
       document.getElementById('nav-rules').className = tab === 'rules' ? 'active' : '';
       document.getElementById('nav-products').className = tab === 'products' ? 'active' : '';
+      document.getElementById('nav-learn').className = tab === 'learn' ? 'active' : '';
+      if(tab === 'learn') { loadConversations(); }
+    }
+
+    function switchLearnTab(sub) {
+      document.querySelectorAll('#learnTabs .nav-link').forEach(a => a.classList.remove('active'));
+      document.querySelector(`#learnTabs .nav-link[data-target="${sub}"]`).classList.add('active');
+      document.getElementById('learn-conversations').style.display = sub === 'conversations' ? 'block' : 'none';
+      document.getElementById('learn-knowledge').style.display = sub === 'knowledge' ? 'block' : 'none';
+      if(sub === 'knowledge') loadKnowledge();
     }
 
     async function loadRules() {
@@ -167,25 +276,109 @@
       alert('Đã lưu kịch bản thành công!');
     }
 
+    let PRODUCTS = [];
+    let prodChanges = {};
+
     async function loadProducts() {
-      const prods = await req('/products');
+      PRODUCTS = await req('/products');
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const q = (document.getElementById('prod-search').value || '').toLowerCase();
       const tbody = document.getElementById('products-table');
       tbody.innerHTML = '';
-      prods.forEach(p => {
+      PRODUCTS.filter(p =>
+        !q || (p.name||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q)
+      ).forEach(p => {
+        const c = prodChanges[p.id] || {};
+        const v = (id, f) => {
+          const val = c[f] !== undefined ? c[f] : p[f];
+          return val == null || val === '' ? '' : val;
+        };
+        const changed = c && Object.keys(c).length;
         tbody.innerHTML += `
-          <tr>
-            <td>${p.sku}</td>
-            <td>${p.name}</td>
-            <td>${p.retailPrice1 || 0}</td>
-            <td>${p.agentPrice10 || 0}</td>
-            <td>${p.printFeePerItem || 0}</td>
-            <td>
-              <button class="btn btn-sm btn-warning" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})'>Sửa</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')">Xóa</button>
-            </td>
-          </tr>
-        `;
+          <tr class="${changed ? 'table-warning' : ''}">
+            <td><input class="form-control form-control-sm" value="${esc(p.sku)}" data-id="${p.id}" data-field="sku" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" value="${esc(p.name)}" data-id="${p.id}" data-field="name" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" style="width:80px" value="${esc(v(null,'unit'))}" data-id="${p.id}" data-field="unit" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" value="${esc(v(null,'note'))}" data-id="${p.id}" data-field="note" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'retailPrice1')}" data-id="${p.id}" data-field="retailPrice1" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'retailPrice3')}" data-id="${p.id}" data-field="retailPrice3" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'retailPrice5')}" data-id="${p.id}" data-field="retailPrice5" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'retailPrice10')}" data-id="${p.id}" data-field="retailPrice10" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'agentPrice10')}" data-id="${p.id}" data-field="agentPrice10" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'agentPrice30')}" data-id="${p.id}" data-field="agentPrice30" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:90px" value="${v(null,'agentPrice50')}" data-id="${p.id}" data-field="agentPrice50" oninput="onCell(this)"></td>
+            <td><input class="form-control form-control-sm" type="number" style="width:80px" value="${v(null,'printFeePerItem')}" data-id="${p.id}" data-field="printFeePerItem" oninput="onCell(this)"></td>
+            <td class="text-center"><input type="checkbox" class="form-check-input" ${p.isPrintable ? 'checked' : ''} data-id="${p.id}" data-field="isPrintable" onchange="onCell(this)"></td>
+            <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p.id}')">🗑</button></td>
+          </tr>`;
       });
+      if(!PRODUCTS.length) tbody.innerHTML = '<tr><td colspan="14" class="text-muted">Chưa có sản phẩm nào.</td></tr>';
+    }
+
+    function onCell(el) {
+      const { id, field } = el.dataset;
+      let val;
+      if (field === 'isPrintable') val = el.checked;
+      else if (field === 'unit' || field === 'note' || field === 'name' || field === 'sku') val = el.value;
+      else val = el.value === '' ? null : parseFloat(el.value);
+      if (!prodChanges[id]) prodChanges[id] = {};
+      prodChanges[id][field] = val;
+      el.closest('tr').classList.add('table-warning');
+    }
+
+    async function saveAllProducts() {
+      const ids = Object.keys(prodChanges);
+      if (!ids.length) { alert('Chưa có thay đổi nào.'); return; }
+      let ok = 0;
+      for (const id of ids) {
+        const changes = prodChanges[id];
+        const base = PRODUCTS.find(p => p.id === id) || {};
+        const data = {
+          sku: changes.sku ?? base.sku,
+          name: changes.name ?? base.name,
+          unit: changes.unit ?? base.unit,
+          note: changes.note ?? base.note,
+          retailPrice1: changes.retailPrice1 ?? base.retailPrice1 ?? 0,
+          retailPrice3: changes.retailPrice3 ?? base.retailPrice3 ?? 0,
+          retailPrice5: changes.retailPrice5 ?? base.retailPrice5 ?? 0,
+          retailPrice10: changes.retailPrice10 ?? base.retailPrice10 ?? 0,
+          agentPrice10: changes.agentPrice10 ?? base.agentPrice10 ?? 0,
+          agentPrice30: changes.agentPrice30 ?? base.agentPrice30 ?? 0,
+          agentPrice50: changes.agentPrice50 ?? base.agentPrice50 ?? 0,
+          printFeePerItem: changes.printFeePerItem ?? base.printFeePerItem ?? 0,
+          isPrintable: changes.isPrintable ?? base.isPrintable ?? false,
+        };
+        // Tự suy mốc trống theo thứ tự giảm dần số lượng
+        const tiers = [['retailPrice1','retailPrice3','retailPrice5','retailPrice10'], ['agentPrice10','agentPrice30','agentPrice50']];
+        tiers.forEach(tier => {
+          let prev = null;
+          for (let i = tier.length - 1; i >= 0; i--) {
+            if (!data[tier[i]]) data[tier[i]] = prev;
+            else prev = data[tier[i]];
+          }
+        });
+        try {
+          await req('/products/' + id, { method: 'PUT', body: data });
+          ok++;
+        } catch(e) { console.error('Lưu thất bại', id, e); }
+      }
+      prodChanges = {};
+      await loadProducts();
+      alert(`Đã lưu ${ok}/${ids.length} sản phẩm!`);
+    }
+
+    function applyBulkPct(dir) {
+      const pct = parseFloat(document.getElementById('bulk-pct').value) || 0;
+      const factor = dir < 0 ? 1 - pct/100 : 1 + pct/100;
+      const fields = ['retailPrice1','retailPrice3','retailPrice5','retailPrice10','agentPrice10','agentPrice30','agentPrice50','printFeePerItem'];
+      PRODUCTS.forEach(p => {
+        if (!prodChanges[p.id]) prodChanges[p.id] = {};
+        fields.forEach(f => { if (p[f]) prodChanges[p.id][f] = Math.round(p[f] * factor); });
+      });
+      renderProducts();
     }
 
     let prodModal;
@@ -197,42 +390,49 @@
       document.getElementById('prod-id').value = '';
       document.getElementById('prod-sku').value = '';
       document.getElementById('prod-name').value = '';
-      document.getElementById('prod-unit').value = 'thùng';
+      document.getElementById('prod-unit').value = 'Cái';
       document.getElementById('prod-retailPrice1').value = '';
       document.getElementById('prod-agentPrice10').value = '';
       document.getElementById('prod-printFeePerItem').value = '';
+      document.getElementById('prod-note').value = '';
+      document.getElementById('prod-isPrintable').checked = false;
       document.getElementById('productModalTitle').innerText = 'Thêm Sản Phẩm';
       prodModal.show();
     }
 
     function editProduct(p) {
       document.getElementById('prod-id').value = p.id;
-      document.getElementById('prod-sku').value = p.sku;
-      document.getElementById('prod-name').value = p.name;
-      document.getElementById('prod-unit').value = p.unit || 'thùng';
-      document.getElementById('prod-retailPrice1').value = p.retailPrice1 || 0;
-      document.getElementById('prod-agentPrice10').value = p.agentPrice10 || 0;
-      document.getElementById('prod-printFeePerItem').value = p.printFeePerItem || 0;
+      document.getElementById('prod-sku').value = p.sku || '';
+      document.getElementById('prod-name').value = p.name || '';
+      document.getElementById('prod-unit').value = p.unit || 'Cái';
+      document.getElementById('prod-retailPrice1').value = p.retailPrice1 || '';
+      document.getElementById('prod-agentPrice10').value = p.agentPrice10 || '';
+      document.getElementById('prod-printFeePerItem').value = p.printFeePerItem || '';
+      document.getElementById('prod-note').value = p.note || '';
+      document.getElementById('prod-isPrintable').checked = !!p.isPrintable;
       document.getElementById('productModalTitle').innerText = 'Sửa Sản Phẩm';
       prodModal.show();
     }
 
     async function saveProduct() {
       const id = document.getElementById('prod-id').value;
+      const retail1 = parseFloat(document.getElementById('prod-retailPrice1').value);
+      const agent10 = parseFloat(document.getElementById('prod-agentPrice10').value);
       const data = {
         sku: document.getElementById('prod-sku').value,
         name: document.getElementById('prod-name').value,
         unit: document.getElementById('prod-unit').value,
-        listedPrice: parseFloat(document.getElementById('prod-retailPrice1').value) || 0,
-        retailPrice1: parseFloat(document.getElementById('prod-retailPrice1').value) || 0,
-        retailPrice3: parseFloat(document.getElementById('prod-retailPrice1').value) || 0,
-        retailPrice5: parseFloat(document.getElementById('prod-retailPrice1').value) || 0,
-        retailPrice10: parseFloat(document.getElementById('prod-agentPrice10').value) || 0,
-        agentPrice10: parseFloat(document.getElementById('prod-agentPrice10').value) || 0,
-        agentPrice30: parseFloat(document.getElementById('prod-agentPrice10').value) || 0,
-        agentPrice50: parseFloat(document.getElementById('prod-agentPrice10').value) || 0,
+        listedPrice: retail1 || 0,
+        retailPrice1: retail1 || 0,
+        retailPrice3: retail1 || 0,
+        retailPrice5: retail1 || 0,
+        retailPrice10: agent10 || 0,
+        agentPrice10: agent10 || 0,
+        agentPrice30: agent10 || 0,
+        agentPrice50: agent10 || 0,
         printFeePerItem: parseFloat(document.getElementById('prod-printFeePerItem').value) || 0,
-        isPrintable: parseFloat(document.getElementById('prod-printFeePerItem').value) > 0,
+        isPrintable: document.getElementById('prod-isPrintable').checked,
+        note: document.getElementById('prod-note').value,
       };
 
       if(id) {
@@ -249,6 +449,140 @@
       if(confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
         await req('/products/' + id, { method: 'DELETE' });
         loadProducts();
+      }
+    }
+
+    /* ===== Bot Học ===== */
+    function esc(s) {
+      return (s == null ? '' : String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    async function loadConversations() {
+      const data = await req('/conversations');
+      const list = document.getElementById('conv-list');
+      list.innerHTML = '';
+      (data || []).forEach(c => {
+        const name = (c.customer && c.customer.fullName) || c.customerId || '';
+        const msgs = c.messages || [];
+        const last = msgs.length ? (msgs[msgs.length-1].content || '') : '';
+        list.innerHTML += `
+          <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-id="${c.id}" onclick="showConversation('${c.id}')">
+            <div>
+              <div>${esc(name)}</div>
+              <small class="text-muted">${esc(last)}</small>
+            </div>
+            <span class="badge bg-secondary">${msgs.length}</span>
+          </a>`;
+      });
+      if(!data || !data.length) list.innerHTML = '<p class="text-muted">Chưa có hội thoại nào.</p>';
+    }
+
+    async function showConversation(id) {
+      document.querySelectorAll('#conv-list .list-group-item').forEach(a => a.classList.remove('active'));
+      const active = document.querySelector('#conv-list .list-group-item[data-id="' + id + '"]');
+      if(active) active.classList.add('active');
+      const box = document.getElementById('conv-detail');
+      box.innerHTML = '<p class="text-muted">Đang tải...</p>';
+      const data = await req('/conversations/' + id);
+      const name = (data.customer && data.customer.fullName) || data.customerId || 'Hội thoại';
+      box.innerHTML = '<h6 class="mb-3">' + esc(name) + '</h6><a class="btn btn-sm btn-secondary mb-3" onclick="loadConversations()">⟲ Làm mới</a>';
+      (data.messages || []).forEach(m => {
+        const isBot = m.sender !== 'CUSTOMER';
+        const badge = m.feedback ? (m.feedback.rating === 'GOOD' ? 'bg-success' : m.feedback.rating === 'BAD' ? 'bg-danger' : 'bg-warning') : 'bg-secondary';
+        const fLabel = m.feedback ? m.feedback.rating : 'Chưa đánh giá';
+        box.innerHTML += `
+          <div class="mb-3 p-2 rounded ${isBot ? 'bg-light border' : 'bg-info-subtle'}">
+            <div class="d-flex justify-content-between">
+              <small class="text-muted">${isBot ? '🤖 BOT' : '👤 KHÁCH'}</small>
+              <span class="badge ${badge}">${fLabel}</span>
+            </div>
+            <div class="mt-1">${esc(m.content || '')}</div>
+            ${isBot ? `<div class="mt-2"><small>messageId:</small> <code>${m.id}</code></div>
+            <button class="btn btn-sm btn-success mt-2" onclick="rate('${m.id}','GOOD')">👍 Đúng</button>
+            <button class="btn btn-sm btn-warning mt-2" onclick="editRate('${m.id}')">✏️ Sửa</button>
+            <button class="btn btn-sm btn-danger mt-2" onclick="rate('${m.id}','BAD')">👎 Sai</button>` : ''}
+          </div>`;
+      });
+    }
+
+    async function rate(id, rating) {
+      await req('/messages/' + id + '/rate', { method: 'POST', body: { rating } });
+      alert(rating === 'GOOD' ? 'Đã lưu! Bot sẽ học câu trả lời này.' : rating === 'BAD' ? 'Đã đánh giá là sai.' : 'Đã lưu câu trả lời mẫu. Bot sẽ học.');
+      reloadCurrentConv();
+    }
+
+    function editRate(id) {
+      const reply = prompt('Nhập câu trả lời mẫu (bot sẽ học câu này):', '');
+      if(reply !== null) {
+        rateEdited(id, reply);
+      }
+    }
+
+    async function rateEdited(id, editedReply) {
+      await req('/messages/' + id + '/rate', { method: 'POST', body: { rating: 'EDITED', editedReply } });
+      alert('Đã lưu câu trả lời mẫu. Bot sẽ học.');
+      reloadCurrentConv();
+    }
+
+    function reloadCurrentConv() {
+      const active = document.querySelector('#conv-list .active');
+      if(active) showConversation(active.getAttribute('data-id'));
+    }
+
+    async function loadKnowledge() {
+      const list = await req('/learned-knowledge');
+      const tbody = document.getElementById('kb-table');
+      tbody.innerHTML = '';
+      (list || []).forEach(k => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${esc(k.question)}</td>
+            <td>${esc(k.answer)}</td>
+            <td>${k.upvotes || 0}</td>
+            <td>${k.used || 0}</td>
+            <td>
+              <button class="btn btn-sm btn-warning" onclick='editKb(${JSON.stringify(k).replace(/'/g, "&apos;")})'>Sửa</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteKb('${k.id}')">Xóa</button>
+            </td>
+          </tr>`;
+      });
+      if(!list || !list.length) tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Chưa có kiến thức nào. Duyệt chat rồi nhấn "Đúng" hoặc "Sửa" để bot học.</td></tr>';
+    }
+
+    let kbModal;
+    document.addEventListener("DOMContentLoaded", function(){
+      kbModal = new bootstrap.Modal(document.getElementById('kbModal'));
+    });
+
+    function showKbModal() {
+      document.getElementById('kb-id').value = '';
+      document.getElementById('kb-question').value = '';
+      document.getElementById('kb-answer').value = '';
+      kbModal.show();
+    }
+
+    function editKb(k) {
+      document.getElementById('kb-id').value = k.id;
+      document.getElementById('kb-question').value = k.question;
+      document.getElementById('kb-answer').value = k.answer;
+      kbModal.show();
+    }
+
+    async function saveKb() {
+      const data = {
+        id: document.getElementById('kb-id').value,
+        question: document.getElementById('kb-question').value,
+        answer: document.getElementById('kb-answer').value
+      };
+      await req('/learned-knowledge', { method: 'POST', body: data });
+      kbModal.hide();
+      loadKnowledge();
+    }
+
+    async function deleteKb(id) {
+      if(confirm('Xóa kiến thức này?')) {
+        await req('/learned-knowledge/' + id, { method: 'DELETE' });
+        loadKnowledge();
       }
     }
   </script>

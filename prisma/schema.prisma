@@ -114,9 +114,41 @@ model Message {
   attachmentUrl  String?      @map("attachment_url") @db.Text
   createdAt      DateTime     @default(now()) @map("created_at")
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  feedback     MessageFeedback?
 
   @@map("messages")
+}
+
+// Đánh giá của Admin cho từng câu trả lời của bot (để bot học)
+model MessageFeedback {
+  id             String        @id @default(uuid())
+  messageId      String        @unique @map("message_id")
+  conversationId String        @map("conversation_id")
+  rating         String        @db.VarChar(20) // GOOD | BAD | EDITED
+  editedReply    String?       @map("edited_reply") @db.Text // câu trả lời đúng do admin sửa
+  note           String?       @db.Text
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("message_feedbacks")
+}
+
+// Kiến thức bot học được từ các hội thoại được admin đánh giá tốt / sửa
+model LearnedKnowledge {
+  id       String   @id @default(uuid())
+  question String   @db.Text // câu hỏi của khách
+  answer   String   @db.Text // câu trả lời tốt (của bot hoặc admin sửa)
+  source   String?  @db.VarChar(50) // conversation_id gốc
+  upvotes  Int      @default(0)
+  used     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([question])
+  @@map("learned_knowledge")
 }
 
 model CustomerInterest {
