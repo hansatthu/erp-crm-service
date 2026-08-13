@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 export class MetaController {
   private readonly verifyToken = process.env.META_VERIFY_TOKEN || 'geta_meta_verify_token';
   private messageBuffers = new Map<string, { texts: string[], timer: NodeJS.Timeout | null, pageId?: string }>();
+  private processingLocks = new Set<string>();
+  private humanInterventionCache = new Map<string, number>();
 
   constructor(
     private readonly aiAgentService: AiAgentService,
@@ -35,6 +37,9 @@ export class MetaController {
     const host = req.get('host') || 'localhost:3000';
     // Return a '200 OK' response to all events
     res.status(HttpStatus.OK).send('EVENT_RECEIVED');
+    console.log('--- RAW WEBHOOK PAYLOAD ---');
+    console.log(JSON.stringify(body, null, 2));
+    console.log('---------------------------');
 
     if (body.object === 'page') {
       for (const entry of body.entry) {
@@ -42,6 +47,49 @@ export class MetaController {
         if (!entry.messaging) continue;
         
         for (const webhookEvent of entry.messaging) {
+          // Bắt sự kiện Echo (Tin nhắn do Admin hoặc Bot gửi)
+          if (webhookEvent.message && webhookEvent.message.is_echo) {
+            const metadata = webhookEvent.message.metadata;
+            // Nếu không có metadata 'AI_BOT', tức là Admin (người thật) vừa nhắn cho khách
+            if (metadata !== 'AI_BOT') {
+              const customerPsid = webhookEvent.recipient.id;
+              // Ngưng bot 5 phút
+              const pauseExpiry = Date.now() + 5 * 60 * 1000;
+              this.humanInterventionCache.set(customerPsid, pauseExpiry);
+              console.log(`[HUMAN HANDOFF] Admin replied to ${customerPsid}. Pausing AI bot for 5 minutes.`);
+
+              const adminText = webhookEvent.message.text;
+              if (adminText) {
+                // 1. Lưu tin nhắn của Admin vào bộ nhớ AI để bot follow cuộc trò chuyện
+                this.aiAgentService.injectAdminMessage(`meta_${customerPsid}`, adminText);
+                
+                // 2. Lưu tin nhắn của Admin vào Database
+                this.prisma.customer.findFirst({
+                  where: { metaUserId: customerPsid, pageId: pageId, platform: 'FACEBOOK' }
+                }).then(customer => {
+                  if (customer) {
+                    return this.prisma.conversation.findFirst({
+                      where: { customerId: customer.id, pageId: pageId, platform: 'FACEBOOK', status: 'OPEN' }
+                    });
+                  }
+                  return null;
+                }).then(dbConversation => {
+                  if (dbConversation) {
+                    return this.prisma.message.create({
+                      data: {
+                        conversationId: dbConversation.id,
+                        sender: 'ADMIN',
+                        messageType: 'TEXT',
+                        content: adminText
+                      }
+                    });
+                  }
+                }).catch(err => console.error('Error logging Admin message to DB:', err));
+              }
+            }
+            continue;
+          }
+
           // Check if it's a message and contains text
           if (webhookEvent.message && webhookEvent.message.text && !webhookEvent.message.is_echo) {
             const senderId = webhookEvent.sender.id;
@@ -65,19 +113,36 @@ export class MetaController {
             // Append new message text
             buffer.texts.push(text);
 
+            // Gửi ngay trạng thái Đã xem (Seen)
+            this.metaService.sendAction(senderId, 'mark_seen', pageId).catch(err => console.warn(err.message));
+            
+            // LƯU Ý: Không gửi typing_on ở đây để tránh làm khách tưởng bot đang trả lời mà ngừng gõ.
+
             // Clear previous timer
             if (buffer.timer) {
               clearTimeout(buffer.timer);
             }
 
-            // Set a new timer to wait for 2.5 seconds before processing
-            buffer.timer = setTimeout(async () => {
+            // Set a new timer to wait for 4 seconds before processing
+            const processBuffer = async () => {
+              if (this.processingLocks.has(senderId)) {
+                buffer.timer = setTimeout(processBuffer, 2000);
+                return;
+              }
+              this.processingLocks.add(senderId);
+
               // Extract combined text and clear buffer
-              const combinedText = buffer.texts.join(' ');
+              const combinedText = buffer.texts.join('\n');
               const savedPageId = buffer.pageId;
               this.messageBuffers.delete(senderId);
               
               console.log(`[Processing Combined Message from ${senderId}]: ${combinedText}`);
+
+              // Chỉ gửi trạng thái Đang soạn tin nhắn (Typing) khi thực sự bắt đầu xử lý
+              const isPaused = this.humanInterventionCache.get(senderId) && this.humanInterventionCache.get(senderId)! > Date.now();
+              if (!isPaused) {
+                this.metaService.sendAction(senderId, 'typing_on', savedPageId).catch(err => console.warn(err.message));
+              }
 
               try {
                 // Forward to AI Agent
@@ -150,7 +215,16 @@ export class MetaController {
                 }
                 // ==========================================
 
-                const aiResponse = await this.aiAgentService.processMessage(combinedText, sessionId, customerName);
+                // Kiểm tra xem khách có đang trong thời gian ngưng Bot (do Admin vừa chat) không
+                const pauseExpiry = this.humanInterventionCache.get(senderId);
+                if (pauseExpiry && pauseExpiry > Date.now()) {
+                  console.log(`[PAUSED] Ignoring message from ${senderId} due to recent admin intervention.`);
+                  // Tuy ngưng gọi AI xử lý, nhưng vẫn bơm tin nhắn của khách vào bộ nhớ AI để bot ngầm follow
+                  this.aiAgentService.injectUserMessage(sessionId, combinedText);
+                  return; // Kết thúc, không sinh AI Response
+                }
+
+                const aiResponse = await this.aiAgentService.processMessage(combinedText, sessionId, customerName, savedPageId);
                 
                 // Send back to Meta (handle multiple bubbles split by ||| or newlines)
                 if (aiResponse) {
@@ -270,13 +344,29 @@ export class MetaController {
                   // Xóa phần LABEL khỏi tin nhắn
                   textToProcess = textToProcess.replace(labelRegex, '').trim();
 
+                  // Bắt sự kiện UNKNOWN_QUESTION để báo cho Admin
+                  if (textToProcess.includes('[UNKNOWN_QUESTION]')) {
+                    textToProcess = textToProcess.replace(/\[UNKNOWN_QUESTION\]/g, '').trim();
+                    console.log(`[UNKNOWN_QUESTION] detected for customer ${senderId}. Triggering Admin Webhook.`);
+                    
+                    const bossHan = process.env.BOSS_HAN_PSID;
+                    const bossCuong = process.env.BOSS_CUONG_PSID;
+                    
+                    const warningMsg = `🚨 SẾP ƠI, CÓ KHÁCH HỎI!\nKhách: ${customerName}\nHỏi: "${combinedText}"\nBot đã trả lời: "${textToProcess}"\nSếp vào Fanpage trả lời giúp em nha!`;
+                    
+                    if (bossHan) {
+                      await this.metaService.sendMessage(bossHan, warningMsg, savedPageId);
+                    }
+                    if (bossCuong) {
+                      await this.metaService.sendMessage(bossCuong, warningMsg, savedPageId);
+                    }
+                  }
+
                   // Thay thế [CURRENT_HOST] bằng host thật của hệ thống để nhúng link thanh toán
                   textToProcess = textToProcess.replace(/\[CURRENT_HOST\]/g, host);
 
-                  // Split by ||| first, then replace newlines with |||
-                  let normalizedResponse = textToProcess.replace(/\n+/g, '|||');
-                  // Tự động ngắt tin nhắn nếu thấy dấu chấm câu theo sau là dấu cách
-                  normalizedResponse = normalizedResponse.replace(/([.!?])\s+/g, '$1|||');
+                  // Chỉ ngắt tin nhắn theo đoạn văn (xuống dòng kép) để tránh việc gửi quá nhiều tin nhắn lắt nhắt
+                  let normalizedResponse = textToProcess.replace(/\n\n+/g, '|||');
                   
                   const bubbles = normalizedResponse.split('|||').map(b => b.trim()).filter(b => b.length > 0);
                   for (const bubble of bubbles) {
@@ -301,8 +391,12 @@ export class MetaController {
                 }
               } catch (error) {
                 console.error('Error processing AI response', error);
+              } finally {
+                this.processingLocks.delete(senderId);
               }
-            }, 2500); // Wait 2.5s for more messages
+            };
+
+            buffer.timer = setTimeout(processBuffer, 4000);
           }
         }
       }
@@ -363,6 +457,12 @@ export class MetaController {
         // Kiểm tra xem có chứa từ khóa không
         const hasKeyword = keywords.some(kw => text.includes(kw));
         if (hasKeyword && conv.customer.metaUserId) {
+          // Bỏ qua nếu khách đang nằm trong cửa sổ admin can thiệp (giống webhook)
+          const pauseExpiry = this.humanInterventionCache.get(conv.customer.metaUserId);
+          if (pauseExpiry && pauseExpiry > Date.now()) {
+            console.log(`[PAUSED] Skip ${conv.customer.fullName} (PSID: ${conv.customer.metaUserId}) due to recent admin intervention.`);
+            continue;
+          }
           console.log(`[SCAN] Found unanswered message from ${conv.customer.fullName} (PSID: ${conv.customer.metaUserId}): ${lastMessage.content}`);
           
           try {
@@ -370,7 +470,8 @@ export class MetaController {
             const aiResponse = await this.aiAgentService.processMessage(
               lastMessage.content || '', 
               conv.conversationId || conv.customer.metaUserId, 
-              conv.customer.fullName || 'Khách hàng'
+              conv.customer.fullName || 'Khách hàng',
+              conv.pageId || undefined
             );
             
             if (aiResponse) {
@@ -390,6 +491,21 @@ export class MetaController {
 
               // Xử lý gửi tin nhắn giống như webhook
               let textToProcess = aiResponse;
+
+              if (textToProcess.includes('[UNKNOWN_QUESTION]')) {
+                textToProcess = textToProcess.replace(/\[UNKNOWN_QUESTION\]/g, '').trim();
+                const bossHan = process.env.BOSS_HAN_PSID;
+                const bossCuong = process.env.BOSS_CUONG_PSID;
+                const warningMsg = `🚨 SẾP ƠI, CÓ KHÁCH HỎI!\nKhách: ${conv.customer.fullName}\nHỏi: "${lastMessage.content}"\nBot đã trả lời: "${textToProcess}"\nSếp vào Fanpage trả lời giúp em nha!`;
+                
+                if (bossHan) {
+                  await this.metaService.sendMessage(bossHan, warningMsg, conv.pageId || undefined);
+                }
+                if (bossCuong) {
+                  await this.metaService.sendMessage(bossCuong, warningMsg, conv.pageId || undefined);
+                }
+              }
+
               textToProcess = textToProcess.replace(/\[CURRENT_HOST\]/g, host);
 
               // Split bubbles

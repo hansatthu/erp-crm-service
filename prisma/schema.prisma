@@ -188,3 +188,48 @@ model OrderItem {
 
   @@map("order_items")
 }
+
+model KnowledgeDocument {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  metadata  Json?
+  embedding Unsupported("vector(3072)")?
+
+  @@map("knowledge_documents")
+}
+
+model BotConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique @db.VarChar(100)
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("bot_configs")
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  sku             String   @unique @db.VarChar(50)
+  name            String   @db.VarChar(255)
+  specs           String?  @db.VarChar(255)
+  unit            String   @db.VarChar(50)
+  costPrice       Decimal? @map("cost_price") @db.Decimal(15, 2)
+  listedPrice     Decimal  @map("listed_price") @db.Decimal(15, 2)
+  retailPrice1    Decimal  @map("retail_price_1") @db.Decimal(15, 2)
+  retailPrice3    Decimal  @map("retail_price_3") @db.Decimal(15, 2)
+  retailPrice5    Decimal  @map("retail_price_5") @db.Decimal(15, 2)
+  retailPrice10   Decimal  @map("retail_price_10") @db.Decimal(15, 2)
+  agentPrice10    Decimal  @map("agent_price_10") @db.Decimal(15, 2)
+  agentPrice30    Decimal  @map("agent_price_30") @db.Decimal(15, 2)
+  agentPrice50    Decimal  @map("agent_price_50") @db.Decimal(15, 2)
+  isPrintable     Boolean  @map("is_printable") @default(false)
+  setupFee        Decimal? @map("setup_fee") @db.Decimal(15, 2)
+  printFeePerItem Decimal? @map("print_fee_per_item") @db.Decimal(15, 2)
+  minPrintQty     Int?     @map("min_print_qty")
+  note            String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("products")
+}

@@ -3,7 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ChatOpenAI } from '@langchain/openai';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { GETA_KNOWLEDGE_DOCS } from './knowledge';
+import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { createToolCallingAgent, AgentExecutor } from 'langchain/agents';
@@ -20,6 +20,10 @@ export interface SupplierResult {
   notes?: string;
 }
 
+const DEFAULT_SYSTEM_PROMPT = `
+Bạn là một nhân viên CSKH. Vui lòng kiểm tra file rules.txt.
+`;
+
 @Injectable()
 export class AiAgentService implements OnModuleInit {
   private readonly logger = new Logger(AiAgentService.name);
@@ -32,6 +36,22 @@ export class AiAgentService implements OnModuleInit {
   async onModuleInit() {
     this.logger.log('Bypassing Vector Store for DeepSeek RAG...');
     this.loadHistoryFromDisk();
+    
+    // Seed default system prompt to database if not exists
+    try {
+      const existing = await this.prisma.botConfig.findUnique({ where: { key: 'SYSTEM_PROMPT' } });
+      if (!existing) {
+        await this.prisma.botConfig.create({
+          data: {
+            key: 'SYSTEM_PROMPT',
+            value: DEFAULT_SYSTEM_PROMPT,
+          }
+        });
+        this.logger.log('Seeded default SYSTEM_PROMPT to database.');
+      }
+    } catch (e) {
+      this.logger.error('Failed to seed SYSTEM_PROMPT to database', e);
+    }
   }
 
   /**
@@ -170,15 +190,68 @@ Ví dụ:
   }
 
   /**
+   * Inject a message from the human Admin into the AI's history
+   * so the AI knows what the Admin said when it takes over again.
+   */
+  injectAdminMessage(sessionId: string, text: string) {
+    const history = this.chatHistories.get(sessionId) || [];
+    history.push(['assistant', text]);
+    if (history.length > 40) history.splice(0, history.length - 40);
+    this.chatHistories.set(sessionId, history);
+    this.saveHistoryToDisk();
+  }
+
+  /**
+   * Inject a message from the User into the AI's history
+   * when the bot is paused by Admin intervention.
+   */
+  injectUserMessage(sessionId: string, text: string) {
+    const history = this.chatHistories.get(sessionId) || [];
+    history.push(['user', text]);
+    if (history.length > 40) history.splice(0, history.length - 40);
+    this.chatHistories.set(sessionId, history);
+    this.saveHistoryToDisk();
+  }
+
+  /**
    * Process incoming messages from Meta or Zalo
    */
-  async processMessage(text: string, sessionId: string, customerName?: string): Promise<string> {
+  async processMessage(text: string, sessionId: string, customerName?: string, pageId?: string): Promise<string> {
     if (!process.env.DEEPSEEK_API_KEY) {
       this.logger.warn('DEEPSEEK_API_KEY is missing, throwing error to prevent sending message.');
       throw new Error('Missing DEEPSEEK_API_KEY');
     }
 
     try {
+      const searchProductsTool = tool(
+        async ({ query }) => {
+          try {
+            const products = await this.prisma.product.findMany({
+              where: {
+                OR: [
+                  { name: { contains: query, mode: 'insensitive' } },
+                  { sku: { contains: query, mode: 'insensitive' } },
+                  { note: { contains: query, mode: 'insensitive' } },
+                ]
+              },
+              take: 10,
+            });
+            return JSON.stringify(products);
+          } catch(err) {
+            return "Lỗi khi tìm kiếm sản phẩm";
+          }
+        },
+        {
+          name: 'search_products',
+          description: 'Tìm kiếm sản phẩm theo tên, sku. Trả về thông tin chi tiết và giá cả.',
+          schema: z.object({
+            query: z.string().describe('Tên sản phẩm hoặc từ khóa cần tìm (VD: 500ml, PP, nắp cầu, ống hút)'),
+          }),
+        }
+      );
+
+      const tools = [searchProductsTool];
+
       const llm = new ChatOpenAI({
         modelName: 'deepseek-chat',
         temperature: 0.7,
@@ -189,80 +262,60 @@ Ví dụ:
         }
       });
 
-      // Inject full knowledge base directly
-      const context = GETA_KNOWLEDGE_DOCS.map(doc => doc.pageContent).join('\n\n');
+      // We don't use vector DB context for products anymore, relying on tools
+      const context = '';
 
       const customerInfo = customerName
         ? `\nTên của khách hàng trên Facebook/Zalo là: "${customerName}". Hãy tự suy luận giới tính qua tên để gọi Anh/Chị. NHƯNG NẾU tên nửa nam nửa nữ (không rõ ràng), BẮT BUỘC dùng xưng hô "Mình" và "Bạn" để tránh gọi sai giới tính gây mất lòng khách nhé.`
         : '';
 
-      const systemPrompt = `
-# VAI TRÒ
-Bạn là một nhân viên chăm sóc khách hàng (CSKH) và tư vấn chốt đơn cực kỳ chuyên nghiệp, khéo léo của xưởng in GETA Tây Ninh.
-TÊN CỦA BẠN LÀ: Nhân viên CSKH GETA.
-TUYỆT ĐỐI KHÔNG BAO GIỜ nhận mình là AI, trợ lý ảo hay người máy. Bạn là người thật 100%.${customerInfo}
+      let rawPrompt = DEFAULT_SYSTEM_PROMPT;
+      try {
+        const rulesPath = path.join(process.cwd(), 'src/ai-agent/rules.txt');
+        if (fs.existsSync(rulesPath)) {
+          rawPrompt = fs.readFileSync(rulesPath, 'utf8');
+        }
+      } catch(e) {
+        this.logger.warn('Failed to load rules.txt', e);
+      }
 
+      // Prepend the persona context to the rules
+      const fullSystemPrompt = `# VAI TRÒ
+Bạn là nhân viên tư vấn của xưởng in GETA Tây Ninh.
+TUYỆT ĐỐI KHÔNG nhận mình là AI, trợ lý ảo. Bạn là người thật 100%.${customerInfo}
 
-# GIỌNG ĐIỆU & PHONG CÁCH CHAT (QUAN TRỌNG NHẤT)
-- Xưng hô: BẮT BUỘC xưng "mình" và gọi khách là "bạn" (hoặc xưng "em" gọi "anh/chị" tùy ngữ cảnh).
-- Phong cách: Cực kỳ tự nhiên, giống như một nhân viên sale Gen Z hoặc Millennial đang nhắn tin trên điện thoại. Hãy dùng icon cảm xúc một cách tự nhiên (như 😊, 🥰, dạ vâng ạ 🙏, dạ đúng rồi hehe).
-- CỰC KỲ NGẮN GỌN: Tuyệt đối KHÔNG LAN MAN. Khách hỏi gì trả lời đúng trọng tâm cái đó. Gộp các ý vào một tin nhắn ngắn gọn, dễ đọc. KHÔNG nhắn quá nhiều tin liên tiếp gây phiền khách.
-- CẤM TUYỆT ĐỐI: Không dùng dấu sao (**) để bôi đậm, vì trông rất giống văn phong của Bot. Hãy viết chữ trơn.
-- CHÍNH TẢ & DẤU CÂU: Có thể không cần quá cứng nhắc về dấu câu ở cuối (có thể bỏ dấu chấm câu ở cuối câu để trông tự nhiên hơn).
-- HIỂU ĐÚNG Ý KHÁCH: Khách hay dùng từ viết tắt ("k", "ok", "dc", "ntn"), phải hiểu đúng ngữ cảnh. Không nói 1 ý 2 lần. Không lặp lại cùng một câu báo giá.
+${rawPrompt}`;
 
-# HƯỚNG DẪN TƯ VẤN & BÁN HÀNG (QUAN TRỌNG NHẤT: BÁN HÀNG NHƯ 1 CHUYÊN GIA)
-1. Chào hỏi thân thiện: "Dạ Geta Tây Ninh chào bạn ạ, bạn đang quan tâm mẫu ly nào bên mình nè?"
-2. NGUYÊN TẮC BÁO GIÁ ĐỂ CHỐT SỈ (BẮT BUỘC):
-   - TIN NHẮN PHẢI SIÊU NGẮN GỌN.
-   - ĐỂ ÉP KHÁCH MUA NHIỀU: Bắt buộc báo giá 1 thùng (để làm mốc), sau đó hé lộ ngay mức giá sỉ rẻ nhất (giá 10 thùng hoặc Đại Lý) để kích thích lòng tham của khách.
-   - Ví dụ ĐÚNG: "Dạ ly UKP 500ml 1 thùng là 549đ/cái. Nhưng lấy sỉ 10 thùng giá sập sàn chỉ còn 479đ/cái thôi ạ. Mình định lấy mấy thùng nè?"
-   - BẮT BUỘC: Tuyệt đối KHÔNG liệt kê bảng giá dài dòng. Chỉ đưa ra đúng 2 mức giá để khách tự so sánh sự chênh lệch.
-3. Khai thác nhu cầu khéo léo: LUÔN kết thúc câu trả lời bằng 1 câu hỏi mở để giữ tương tác: "Bạn dự định lấy khoảng bao nhiêu thùng để mình báo giá sỉ rẻ nhất cho mình luôn ạ?" hoặc "Mình bán trà sữa hay cà phê vậy bạn ơi?"
-4. Upsell: Khuyến khích khách in số lượng nhiều hơn để có giá tốt, nhắc khách là bên mình có thiết kế logo miễn phí.
-5. TƯ VẤN SIZE LY (CHỈ KHI KHÁCH HỎI):
-   - TUYỆT ĐỐI KHÔNG tự động chèn gợi ý size ly vào tin nhắn nếu khách không hỏi (để tránh dài dòng).
-   - CHỈ KHI NÀO khách chủ động hỏi "Bán trà sữa/cà phê thì nên dùng size nào?" thì mới tư vấn như sau: Bán Cà Phê (360ml), Rau má/Nước dừa (900ml), Trà sữa (500ml và 700ml).
-
-# HẠN CHẾ GỬI NHIỀU TIN NHẮN
-Tuyệt đối KHÔNG gửi quá nhiều tin nhắn lắt nhắt cùng lúc gây phiền khách hàng. Hãy gộp các ý vào 1 (hoặc tối đa 2) tin nhắn ngắn gọn, súc tích.
-Chỉ dùng ký hiệu ||| để tách tin nhắn nếu thực sự cần thiết (khi 2 ý quá dài và khác biệt).
-VÍ DỤ ĐÚNG: "Dạ mẫu ly nắp cầu 500ml bên mình đang sẵn hàng đó ạ. Bạn định in logo 1 màu hay nhiều màu nè?"
-VÍ DỤ SAI: "Dạ mẫu ly nắp cầu 500ml bên mình đang sẵn hàng đó ạ ||| Bạn định in logo 1 màu ||| hay nhiều màu nè?" (Tách quá nhiều tin nhắn lắt nhắt gây phiền phức).
-
-# BẮT BUỘC: MÃ LỆNH HỆ THỐNG (SYSTEM TAGS)
-Để hệ thống phần mềm hoạt động, bạn BẮT BUỘC phải tự động chèn các Thẻ (Tag) sau vào BẤT CỨ ĐÂU trong câu trả lời của bạn. Khách sẽ không nhìn thấy các thẻ này.
-1. THẺ GẮN NHÃN [LABEL: Tên Nhãn]: Bạn BẮT BUỘC phải tự đánh giá và chèn 1 thẻ Label để hệ thống phân loại khách.
-   - Ví dụ: [LABEL: Khách Mới], [LABEL: Khách Lẻ] (nếu mua < 10 thùng), [LABEL: Khách Đại Lý] (nếu mua >= 10 thùng), [LABEL: Đã Báo Giá], [LABEL: Chốt Đơn].
-
-# QUY TRÌNH CHỐT ĐƠN & LẤY THÔNG TIN
-Khi khách ĐỒNG Ý CHỐT ĐƠN, bạn BẮT BUỘC phải xin đủ 3 thông tin: Tên, Số điện thoại, Địa chỉ giao hàng.
-Bạn có thể hỏi gộp (Ví dụ: "Dạ bạn cho mình xin Tên, SĐT và Địa chỉ để lên đơn nha") hoặc hỏi từng câu một tùy ngữ cảnh. Khách sẽ nhắn tin trả lời lại.
-
-# TẠO ĐƠN HÀNG (QUAN TRỌNG NHẤT)
-Chỉ khi nào khách ĐÃ CUNG CẤP ĐỦ thông tin (Tên, SĐT, Địa chỉ, Sản phẩm, Số lượng), bạn PHẢI xác nhận lại đơn hàng và chèn đoạn mã JSON sau vào CUỐI tin nhắn để hệ thống lưu đơn:
-{
-    "customer_name":"Tên khách",
-    "phone":"SĐT khách",
-    "address":"Địa chỉ khách",
-    "product":"Tên sản phẩm khách chốt",
-    "quantity": Số lượng,
-    "total_price": BẮT BUỘC ghi tổng số tiền (chỉ ghi số, ví dụ 150000. ĐỪNG BAO GIỜ BỎ QUÊN TRƯỜNG NÀY)
-}
-
-# THÔNG TIN KIẾN THỨC (DỰA VÀO ĐÂY ĐỂ TƯ VẤN)
-${context}
-
-`;
-
+      const systemPrompt = fullSystemPrompt;
       const history = this.chatHistories.get(sessionId) || [];
-      const messages: any[] = [['system', systemPrompt], ...history, ['user', text]];
+      
+      const prompt = ChatPromptTemplate.fromMessages([
+        ['system', systemPrompt],
+        new MessagesPlaceholder('history'),
+        ['user', '{input}'],
+        new MessagesPlaceholder('agent_scratchpad'),
+      ]);
+
+      const agent = createToolCallingAgent({
+        llm,
+        tools,
+        prompt,
+      });
+
+      const agentExecutor = new AgentExecutor({
+        agent,
+        tools,
+        maxIterations: 10,
+      });
 
       let response;
       let timeoutId: NodeJS.Timeout;
       try {
         response = await Promise.race([
-          llm.invoke(messages),
+          agentExecutor.invoke({
+            input: text,
+            history: history,
+          }),
           new Promise((_, reject) => {
             timeoutId = setTimeout(() => reject(new Error('LLM Timeout (Rate Limited)')), 45000);
           })
@@ -275,7 +328,16 @@ ${context}
       }
 
       // Extract Label and track Partner status
-      let textToProcess = response.content as string;
+      let textToProcess = response.output as string;
+
+      // Guard: một số bản LangChain trả text lỗi trong output thay vì throw.
+      // Không bao giờ gửi text lỗi cho khách hàng.
+      const errorMarkers = ['max iterations', 'Agent stopped', 'rate limit', 'internal server error'];
+      if (!textToProcess || errorMarkers.some(m => textToProcess.toLowerCase().includes(m))) {
+        this.logger.warn(`Agent returned error text for session ${sessionId}: "${textToProcess}". Sending graceful reply.`);
+        return 'Dạ anh/chị ơi, em đang tra cứu thông tin giúp anh/chị. Anh/chị chờ em chút rồi em trả lời ngay nhé!';
+      }
+
       const labelRegex = /\[LABEL:\s*([^\]]+)\]/i;
       const labelMatch = textToProcess.match(labelRegex);
       if (labelMatch) {

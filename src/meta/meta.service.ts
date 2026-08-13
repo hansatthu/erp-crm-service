@@ -18,7 +18,7 @@ export class MetaService implements OnModuleInit {
   private async autoWhitelistDomain() {
     try {
       // 1. Fetch ngrok public URL
-      const res = await firstValueFrom(this.httpService.get('http://localhost:4040/api/tunnels'));
+      const res = await firstValueFrom(this.httpService.get('http://tunnel:4040/api/tunnels'));
       const tunnels = res.data?.tunnels || [];
       const httpsTunnel = tunnels.find((t: any) => t.public_url.startsWith('https://'));
       
@@ -142,6 +142,7 @@ export class MetaService implements OnModuleInit {
         },
         message: {
           text: text,
+          metadata: 'AI_BOT'
         },
         messaging_type: 'RESPONSE'
       };
@@ -208,6 +209,7 @@ export class MetaService implements OnModuleInit {
               },
             },
           },
+          metadata: 'AI_BOT'
         },
       };
 

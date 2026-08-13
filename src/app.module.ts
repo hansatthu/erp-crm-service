@@ -5,6 +5,8 @@ import { ZaloModule } from './zalo/zalo.module';
 import { AiAgentModule } from './ai-agent/ai-agent.module';
 import { MetaModule } from './meta/meta.module';
 import { PaymentModule } from './payment/payment.module';
+import { KnowledgeModule } from './knowledge/knowledge.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -13,7 +15,9 @@ import { PaymentModule } from './payment/payment.module';
     ZaloModule,
     AiAgentModule,
     MetaModule,
-    PaymentModule
+    PaymentModule,
+    KnowledgeModule,
+    AdminModule
   ],
   controllers: [],
   providers: [],

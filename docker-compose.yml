@@ -1,28 +1,44 @@
 version: '3.8'
 
 services:
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: erp-crm-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: erp_crm_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - erp-crm-db-data:/var/lib/postgresql/data
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: geta-backend
+    container_name: erp-crm-backend
     restart: always
     ports:
-      - "3000:3000"
+      - "3085:3000"
     env_file:
       - .env
     environment:
       - NODE_ENV=production
+    depends_on:
+      - db
 
-  ngrok:
+  tunnel:
     image: ngrok/ngrok:latest
-    container_name: geta-ngrok
+    container_name: erp-crm-tunnel
     restart: always
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-    command:
-      - "http"
-      - "backend:3000"
-      - "--domain=morphine-tidings-delicate.ngrok-free.dev"
+    command: http --url=${NGROK_DOMAIN} backend:3000
     depends_on:
       - backend
+
+volumes:
+  erp-crm-db-data:
+
